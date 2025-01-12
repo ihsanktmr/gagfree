@@ -1,4 +1,4 @@
-package com.lifeyapps.xpostarter
+package com.gagfree
 
 import android.app.Application
 import android.content.res.Configuration

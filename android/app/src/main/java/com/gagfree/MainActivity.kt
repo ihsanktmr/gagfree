@@ -1,4 +1,4 @@
-package com.lifeyapps.xpostarter
+package com.gagfree
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build
