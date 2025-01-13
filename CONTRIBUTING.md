@@ -27,3 +27,35 @@ Want to write some code? Awesome! Follow these steps:
    ```bash
    git clone https://github.com/ihsanktmr/gagfree.git
    cd gagfree
+
+### Create a new branch:
+```bash
+git checkout -b your-feature-name
+```
+
+### Make changes and commit:
+- Write clear, concise commit messages.
+- Follow the existing code style.
+
+```bash
+git commit -m "Add: [short description of your change]"
+```
+
+### Push to your fork:
+```bash
+git push origin your-feature-name
+```
+
+### Submit a Pull Request:
+- Open a Pull Request (PR) and link it to any related issues.
+- Provide a detailed description of your changes.
+
+---
+
+## Code of Conduct 🤝
+Be respectful, kind, and professional. Let's build a positive and inclusive community!
+
+---
+
+## Need Help? 🤔
+If you have any questions, feel free to reach out by creating an issue or contacting the project maintainers directly.
