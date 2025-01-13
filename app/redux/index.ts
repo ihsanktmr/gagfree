@@ -14,10 +14,12 @@ import languageReducer from "./language/reducers";
 import miscReducer from "./misc/reducers";
 import { persistStorage } from "./persistStorage";
 import themeReducer from "./theme/reducers";
+import postsReducer from "./post/reducers";
 
 // Combine reducers
 const rootReducer = {
   misc: miscReducer,
+  post: postsReducer,
   theme: themeReducer,
   language: languageReducer,
 };

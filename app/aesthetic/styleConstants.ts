@@ -1,4 +1,4 @@
-import { Dimensions } from "react-native";
+import { Dimensions, Platform } from "react-native";
 
 import { distances } from "./distances";
 
@@ -70,3 +70,20 @@ export const shadowProps = {
   shadowRadius: 8.65,
   elevation: 10,
 };
+
+export const getBottomTabBarHeight = () => {
+  switch (Platform.OS) {
+    case "ios":
+      return 55;
+    case "android":
+      return 52.5;
+    default:
+      return 52.5;
+  }
+};
+
+export const mainTabBarBottomMargin = 30;
+export const dividerHeight = 0.25;
+export const scrollViewBottomGap = 75;
+export const searchInputTopMargin = 30;
+export const searchInputHeight = 30;

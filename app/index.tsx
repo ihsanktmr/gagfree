@@ -10,7 +10,7 @@ import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 
 import { customFontsToLoad } from "./aesthetic/typography";
-import { AppNavigator } from "./navigation";
+import AppNavigator from "./navigation";
 import { LanguageProvider } from "./providers/LanguageProvider";
 import { SnackbarProvider } from "./providers/SnackbarProvider";
 import { persistor, store } from "./redux";

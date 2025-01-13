@@ -7,15 +7,15 @@ import { i18n } from "../language";
 const SHARE_NOT_SUPPORTED_MESSAGE = i18n.t("shareNotSupported");
 const ERROR_TITLE = i18n.t("errorTitle");
 
-interface ShareMuseumParams {
-  name?: string;
+interface SharePostParams {
+  title?: string;
 }
 
-export const shareMuseum = async (params: ShareMuseumParams): Promise<void> => {
+export const sharePost = async (params: SharePostParams): Promise<void> => {
   const shareMessage =
-    i18n.t("shareMuseumMessage") +
+    i18n.t("sharePostMessage") +
     " " +
-    params.name +
+    params.title +
     "?" +
     "\n" +
     "\n" +
