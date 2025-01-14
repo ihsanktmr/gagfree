@@ -6,7 +6,7 @@ import { distances } from "app/aesthetic/distances";
 import { borderRadii } from "app/aesthetic/styleConstants";
 import { typography } from "app/aesthetic/typography";
 import { isIos, mapCustomStyle, mapCustomStyleDark } from "app/appInfo";
-import { InternetModal } from "app/components/common/InternetModal";
+import { InternetModal } from "app/components/modals/InternetModal";
 import { ThemedView } from "app/components/containers/ThemedView";
 import { ThemedText } from "app/components/texts/ThemedText";
 import { useData } from "app/hooks/useData";

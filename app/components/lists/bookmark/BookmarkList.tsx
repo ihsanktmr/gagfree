@@ -8,39 +8,31 @@ import { FlatList, StyleSheet } from "react-native";
 
 import BookmarkComponent from "./BookmarkComponent";
 
-// List
-
 const BookmarkList = ({ data }) => {
   const backgroundColor = useThemeColor("background");
 
-  const renderItem = ({ item }) => {
-    return <BookmarkComponent item={item} />;
-  };
+  const renderEmptyComponent = () => (
+    <ThemedText style={styles.calloutTitle}>
+      {i18n.t("bookmarkEmptyText")}
+    </ThemedText>
+  );
+
+  const renderItem = ({ item }) => <BookmarkComponent item={item} />;
 
   return (
     <FlatList
-      ListEmptyComponent={() => (
-        <ThemedText style={stylesFlatList.calloutTitle}>
-          {i18n.t("bookmarkEmptyText")}
-        </ThemedText>
-      )}
       data={data}
       renderItem={renderItem}
       keyExtractor={(item) => item._id}
+      ListEmptyComponent={renderEmptyComponent}
       showsVerticalScrollIndicator={false}
-      contentContainerStyle={{
-        ...stylesFlatList.contentContainer,
-        backgroundColor,
-      }}
-      style={{
-        ...stylesFlatList.container,
-        backgroundColor,
-      }}
+      contentContainerStyle={[styles.contentContainer, { backgroundColor }]}
+      style={[styles.container, { backgroundColor }]}
     />
   );
 };
 
-const stylesFlatList = StyleSheet.create({
+const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
