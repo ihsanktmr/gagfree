@@ -3,7 +3,7 @@ import { useEffect } from "react";
 
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import MainTabBar from "app/components/common/MainTabBar";
+import MainTabBar from "app/components/common/GFTabBar";
 import { selectIsOnboardingSeen } from "app/redux/misc/selectors";
 import { setTheme } from "app/redux/theme/actions";
 import { BookmarksScreen } from "app/screens/BookmarksScreen";

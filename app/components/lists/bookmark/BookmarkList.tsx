@@ -1,11 +1,11 @@
 import React from "react";
 
 import { typography } from "app/aesthetic/typography";
+import { ThemedText } from "app/components/texts/ThemedText";
 import { useThemeColor } from "app/hooks/useThemeColor";
 import { i18n } from "app/language";
 import { FlatList, StyleSheet } from "react-native";
 
-import { ThemedText } from "../texts/ThemedText";
 import BookmarkComponent from "./BookmarkComponent";
 
 // List

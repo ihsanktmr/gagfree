@@ -3,7 +3,7 @@ import React from "react";
 import { Entypo } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { Header } from "app/components/common/Header";
-import BookmarkList from "app/components/lists/BookmarkList";
+import BookmarkList from "app/components/lists/bookmark/BookmarkList";
 import { useThemeColor } from "app/hooks/useThemeColor";
 import { selectBookmarkedPosts } from "app/redux/post/selectors";
 import { useSelector } from "react-redux";
