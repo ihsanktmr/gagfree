@@ -34,8 +34,8 @@ export function PostsScreen() {
   const MIN_ZOOM_DELTA = 0.008;
   const MAX_ZOOM_DELTA = 1.5;
   const initialRegion: Region = {
-    latitude: 38.4237,
-    longitude: 27.1428,
+    latitude: 40.6782,
+    longitude: -73.9442,
     latitudeDelta: MAX_ZOOM_DELTA,
     longitudeDelta: MAX_ZOOM_DELTA,
   };

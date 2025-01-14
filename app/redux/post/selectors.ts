@@ -1,5 +1,5 @@
 import { RootState } from "..";
 
-export const selectPosts = (state: RootState) => state.posts;
+export const selectPosts = (state: RootState) => state.post;
 export const selectBookmarkedPosts = (state: RootState) =>
-  state.posts.bookmarkedPosts;
+  state.post.bookmarkedPosts;
