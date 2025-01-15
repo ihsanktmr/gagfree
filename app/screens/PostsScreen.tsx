@@ -6,8 +6,9 @@ import { distances } from "app/aesthetic/distances";
 import { borderRadii } from "app/aesthetic/styleConstants";
 import { typography } from "app/aesthetic/typography";
 import { isIos, mapCustomStyle, mapCustomStyleDark } from "app/appInfo";
-import { InternetModal } from "app/components/modals/InternetModal";
+import { FABButton } from "app/components/buttons/FABButton";
 import { ThemedView } from "app/components/containers/ThemedView";
+import { InternetModal } from "app/components/modals/InternetModal";
 import { ThemedText } from "app/components/texts/ThemedText";
 import { useData } from "app/hooks/useData";
 import { useThemeColor } from "app/hooks/useThemeColor";
@@ -77,6 +78,10 @@ export function PostsScreen() {
 
   const closeTheInternetModal = () => setIsInternetModalVisible(false);
 
+  const handleFABPress = () => {
+    console.log("FAB pressed!");
+  };
+
   // Rendering
   const renderMarker = (post: Post) => {
     if (!post.contact) return null;
@@ -142,6 +147,8 @@ export function PostsScreen() {
       >
         {posts.map(renderMarker)}
       </MapView>
+
+      <FABButton onPress={handleFABPress} icon="plus" />
 
       <InternetModal
         visible={isInternetModalVisible}
