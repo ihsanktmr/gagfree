@@ -9,6 +9,7 @@ import { isIos, mapCustomStyle, mapCustomStyleDark } from "app/appInfo";
 import { FABButton } from "app/components/buttons/FABButton";
 import { ThemedView } from "app/components/containers/ThemedView";
 import { InternetModal } from "app/components/modals/InternetModal";
+import { SwiperTutorialModal } from "app/components/modals/SwiperAddModal";
 import { ThemedText } from "app/components/texts/ThemedText";
 import { useData } from "app/hooks/useData";
 import { useThemeColor } from "app/hooks/useThemeColor";
@@ -19,6 +20,16 @@ import { Image, StyleSheet, View } from "react-native";
 import MapView, { Callout, Marker, Region } from "react-native-maps";
 import { useSelector } from "react-redux";
 
+const productInputData = {
+  title1: "Add Product Details",
+  title2: "Upload Product Photos",
+  slide1Text:
+    "Enter a detailed description of your product to attract customers.",
+  slide2Text: "Add clear and high-quality photos of the product.",
+  func1: () => console.log("Product description action triggered"),
+  func2: () => console.log("Photo upload action triggered"),
+};
+
 export function PostsScreen() {
   const posts = useData();
   const { navigate } = useNavigation();
@@ -27,7 +38,8 @@ export function PostsScreen() {
   // State
   const [view, setView] = useState("map");
   const [region, setRegion] = useState<Region>(initialRegion);
-  const [isInternetModalVisible, setIsInternetModalVisible] = useState(false);
+  const [internetModalVisible, setInternetModalVisible] = useState(false);
+  const [addProductModalVisible, setAddProductModalVisible] = useState(false);
 
   const mapViewRef = useRef<MapView | null>(null);
 
@@ -50,7 +62,7 @@ export function PostsScreen() {
   useEffect(() => {
     // Setup connectivity listener
     const unsubscribe = setupConnectivityListener((connected) => {
-      setIsInternetModalVisible(!connected);
+      setInternetModalVisible(!connected);
     });
     return unsubscribe; // Cleanup on unmount
   }, []);
@@ -58,8 +70,8 @@ export function PostsScreen() {
   // Event Handlers
   const retryConnection = () => {
     isConnected()
-      .then(() => setIsInternetModalVisible(false))
-      .catch(() => setIsInternetModalVisible(true));
+      .then(() => setInternetModalVisible(false))
+      .catch(() => setInternetModalVisible(true));
   };
 
   const handleMarkerPress = (post: Post) => {
@@ -76,10 +88,10 @@ export function PostsScreen() {
 
   const handlePress = (postId: string) => navigate("PostDetail", { postId });
 
-  const closeTheInternetModal = () => setIsInternetModalVisible(false);
+  const closeTheInternetModal = () => setInternetModalVisible(false);
 
   const handleFABPress = () => {
-    console.log("FAB pressed!");
+    setAddProductModalVisible(true);
   };
 
   // Rendering
@@ -151,10 +163,16 @@ export function PostsScreen() {
       <FABButton onPress={handleFABPress} icon="plus" />
 
       <InternetModal
-        visible={isInternetModalVisible}
+        visible={internetModalVisible}
         backgroundColor={backgroundColor}
         onRetry={retryConnection}
         onDismiss={closeTheInternetModal}
+      />
+
+      <SwiperTutorialModal
+        visible={addProductModalVisible}
+        onDismiss={() => setAddProductModalVisible(false)}
+        data={productInputData}
       />
     </ThemedView>
   );
