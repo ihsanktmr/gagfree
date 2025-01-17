@@ -1,23 +1,22 @@
 import React, { useEffect, useRef, useState } from "react";
 
-import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { distances } from "app/aesthetic/distances";
 import { borderRadii } from "app/aesthetic/styleConstants";
 import { typography } from "app/aesthetic/typography";
-import { isIos, mapCustomStyle, mapCustomStyleDark } from "app/appInfo";
+import { mapCustomStyle, mapCustomStyleDark } from "app/appInfo";
 import { FABButton } from "app/components/buttons/FABButton";
+import { MapViewComponent } from "app/components/common/GFMapView";
 import { ThemedView } from "app/components/containers/ThemedView";
 import { InternetModal } from "app/components/modals/InternetModal";
 import { SwiperTutorialModal } from "app/components/modals/SwiperAddModal";
-import { ThemedText } from "app/components/texts/ThemedText";
 import { useData } from "app/hooks/useData";
 import { useThemeColor } from "app/hooks/useThemeColor";
 import { Post } from "app/redux/post/types";
 import { selectTheme } from "app/redux/theme/selectors";
 import { isConnected, setupConnectivityListener } from "app/utils/netCheck";
-import { Image, StyleSheet, View } from "react-native";
-import MapView, { Callout, Marker, Region } from "react-native-maps";
+import { StyleSheet } from "react-native";
+import MapView, { Region } from "react-native-maps";
 import { useSelector } from "react-redux";
 
 const productInputData = {
@@ -94,71 +93,23 @@ export function PostsScreen() {
     setAddProductModalVisible(true);
   };
 
-  // Rendering
-  const renderMarker = (post: Post) => {
-    if (!post.contact) return null;
-    return (
-      <Marker
-        key={post._id}
-        coordinate={{
-          latitude: post.contact.latitude,
-          longitude: post.contact.longitude,
-        }}
-        pinColor={mainColor}
-        title={post.title}
-        description={post.description}
-        onPress={() => handleMarkerPress(post)}
-        tracksViewChanges={false}
-      >
-        {isIos && (
-          <Callout
-            tooltip
-            style={[styles.calloutContainer2, { backgroundColor }]}
-            onPress={() => handlePress(post._id)}
-          >
-            <ThemedView style={styles.calloutContainer}>
-              <View style={styles.calloutTitleContainer}>
-                <View style={styles.calloutOverviewContainer}>
-                  <ThemedText numberOfLines={1} style={styles.calloutTitle}>
-                    {post.title}
-                  </ThemedText>
-                </View>
-                <Ionicons name="arrow-forward" size={20} color={iconColor} />
-              </View>
-              <ThemedText numberOfLines={12} style={styles.calloutDescription}>
-                {post.description}
-              </ThemedText>
-              {post.images?.length > 0 && (
-                <Image
-                  source={{ uri: post.images[0]?.imageUrl }}
-                  style={styles.calloutImage}
-                  resizeMode="cover"
-                />
-              )}
-            </ThemedView>
-          </Callout>
-        )}
-      </Marker>
-    );
+  const handleCalloutPress = (postId: string) => {
+    navigate("PostDetail", { postId });
   };
 
   return (
     <ThemedView style={styles.mainContainer}>
-      <MapView
-        customMapStyle={theme === "dark" ? mapCustomStyleDark : mapCustomStyle}
-        ref={mapViewRef}
-        initialRegion={initialRegion}
+      <MapViewComponent
+        posts={posts}
         region={region}
-        onRegionChangeComplete={setRegion}
-        userInterfaceStyle={theme}
-        showsUserLocation
-        showsMyLocationButton={false}
-        zoomEnabled
-        scrollEnabled
-        style={isViewMap ? styles.fullscreenMap : undefined}
-      >
-        {posts.map(renderMarker)}
-      </MapView>
+        setRegion={setRegion}
+        initialRegion={initialRegion}
+        theme={{ currentTheme: theme, mainColor, iconColor, backgroundColor }}
+        mapCustomStyle={mapCustomStyle}
+        mapCustomStyleDark={mapCustomStyleDark}
+        onMarkerPress={handleMarkerPress}
+        onCalloutPress={handleCalloutPress}
+      />
 
       <FABButton onPress={handleFABPress} icon="plus" />
 
