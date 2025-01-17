@@ -1,6 +1,5 @@
 import React, { FC } from "react";
 
-import { distances } from "app/aesthetic/distances";
 import { borderRadii } from "app/aesthetic/styleConstants";
 import { useThemeColor } from "app/hooks/useThemeColor";
 import { StyleSheet, View } from "react-native";

@@ -9,7 +9,6 @@ import { useThemeColor } from "app/hooks/useThemeColor";
 import { i18n } from "app/language";
 import { triggerSelectionChangeFeedback } from "app/utils/haptics";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface MainTabBarProps {
   state: any;
@@ -22,11 +21,9 @@ export const MainTabBar: React.FC<MainTabBarProps> = ({
   descriptors,
   navigation,
 }) => {
-  const insets = useSafeAreaInsets();
   const bottomTabBarHeight = getBottomTabBarHeight();
 
   const iconColor = useThemeColor("icon");
-  const textColor = useThemeColor("text");
   const backgroundColor = useThemeColor("background");
   const mainColor = useThemeColor("main");
 
