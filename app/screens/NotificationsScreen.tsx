@@ -3,17 +3,27 @@ import React from "react";
 import { Entypo } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { Header } from "app/components/common/Header";
-import BookmarkList from "app/components/lists/bookmark/BookmarkList";
+import NotificationList from "app/components/lists/notification/NotificationList";
 import { useThemeColor } from "app/hooks/useThemeColor";
-import { selectBookmarkedPosts } from "app/redux/post/selectors";
-import { useSelector } from "react-redux";
+
+const mockNotifications = [
+  {
+    id: "1",
+    message: "Your post has been liked!",
+    timestamp: "2025-01-16T10:00:00Z",
+    iconName: "heart",
+  },
+  {
+    id: "2",
+    message: "You have a new follower!",
+    timestamp: "2025-01-15T15:30:00Z",
+    iconName: "person-add",
+  },
+];
 
 export function NotificationsScreen() {
   const navigation = useNavigation();
   const iconColor = useThemeColor("icon");
-  const bookmarkedPosts = useSelector(selectBookmarkedPosts);
-
-  const hasBookmarks = bookmarkedPosts.length > 0;
 
   const handleGoBack = () => navigation.goBack();
 
@@ -24,7 +34,7 @@ export function NotificationsScreen() {
         leftIcon={<Entypo name="chevron-left" size={24} color={iconColor} />}
         onLeftPress={handleGoBack}
       />
-      {hasBookmarks && <BookmarkList data={bookmarkedPosts} />}
+      <NotificationList notifications={mockNotifications} />;
     </>
   );
 }
