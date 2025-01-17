@@ -55,6 +55,10 @@ export function SettingsScreen() {
     navigation.navigate("BookmarksScreen");
   };
 
+  const handleNotifications = () => {
+    navigation.navigate("NotificationsScreen");
+  };
+
   return (
     <ScrollView
       showsVerticalScrollIndicator={false}
@@ -81,6 +85,12 @@ export function SettingsScreen() {
         <SettingButton
           onPress={handleBookmarks}
           name={i18n.t("bookmarks")}
+          icon={<Entypo name="bookmarks" size={24} color={iconColor} />}
+          nextIcon={true}
+        />
+         <SettingButton
+          onPress={handleNotifications}
+          name={i18n.t("notifications")}
           icon={<Entypo name="bookmarks" size={24} color={iconColor} />}
           nextIcon={true}
         />

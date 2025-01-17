@@ -5,6 +5,7 @@ const en = {
   list: "List",
   changeLanguage: "Change Language",
   settings: "Settings",
+  notifications: "Notifications",
   discover: "Discover",
   onboardingDescription1:
     "Browse through available posts to find items you can give away or collect, using an interactive map or a simple list view.",

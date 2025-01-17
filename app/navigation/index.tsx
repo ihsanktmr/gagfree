@@ -7,6 +7,7 @@ import MainTabBar from "app/components/common/GFTabBar";
 import { selectIsOnboardingSeen } from "app/redux/misc/selectors";
 import { setTheme } from "app/redux/theme/actions";
 import { BookmarksScreen } from "app/screens/BookmarksScreen";
+import { NotificationsScreen } from "app/screens/NotificationsScreen";
 // Import screens
 import { OnboardingScreen } from "app/screens/OnboardingScreen";
 import PostDetailScreen from "app/screens/PostDetailScreen";
@@ -83,6 +84,11 @@ function RootStack() {
       <Stack.Screen
         name="BookmarksScreen"
         component={BookmarksScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="NotificationsScreen"
+        component={NotificationsScreen}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>

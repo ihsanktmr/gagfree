@@ -38,8 +38,8 @@ export const FABButton: FC<Props> = ({
 const styles = StyleSheet.create({
   container: {
     position: "absolute",
-    bottom: distances.lg,
-    right: distances.lg,
+    bottom: 100,
+    right: 35,
     zIndex: 1000,
   },
   fab: {
