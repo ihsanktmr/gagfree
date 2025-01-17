@@ -8,23 +8,23 @@ import { FlatList, StyleSheet } from "react-native";
 
 import BookmarkComponent from "./BookmarkComponent";
 
-const BookmarkList = ({ data }) => {
+interface BookmarkListProps {
+  data: any[]; // Replace `any` with a proper type for your data if available.
+}
+
+const BookmarkList: React.FC<BookmarkListProps> = ({ data }) => {
   const backgroundColor = useThemeColor("background");
-
-  const renderEmptyComponent = () => (
-    <ThemedText style={styles.calloutTitle}>
-      {i18n.t("bookmarkEmptyText")}
-    </ThemedText>
-  );
-
-  const renderItem = ({ item }) => <BookmarkComponent item={item} />;
 
   return (
     <FlatList
       data={data}
-      renderItem={renderItem}
+      renderItem={({ item }) => <BookmarkComponent item={item} />}
       keyExtractor={(item) => item._id}
-      ListEmptyComponent={renderEmptyComponent}
+      ListEmptyComponent={
+        <ThemedText style={styles.calloutTitle}>
+          {i18n.t("bookmarkEmptyText")}
+        </ThemedText>
+      }
       showsVerticalScrollIndicator={false}
       contentContainerStyle={[styles.contentContainer, { backgroundColor }]}
       style={[styles.container, { backgroundColor }]}

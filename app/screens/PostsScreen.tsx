@@ -19,38 +19,39 @@ import { StyleSheet } from "react-native";
 import MapView, { Region } from "react-native-maps";
 import { useSelector } from "react-redux";
 
-const productInputData = {
-  title1: "Add Product Details",
-  title2: "Upload Product Photos",
-  slide1Text:
-    "Enter a detailed description of your product to attract customers.",
-  slide2Text: "Add clear and high-quality photos of the product.",
-  func1: () => console.log("Product description action triggered"),
-  func2: () => console.log("Photo upload action triggered"),
-};
-
 export function PostsScreen() {
   const posts = useData();
   const { navigate } = useNavigation();
   const theme = useSelector(selectTheme);
 
-  // State
-  const [view, setView] = useState("map");
-  const [region, setRegion] = useState<Region>(initialRegion);
-  const [internetModalVisible, setInternetModalVisible] = useState(false);
-  const [addProductModalVisible, setAddProductModalVisible] = useState(false);
-
-  const mapViewRef = useRef<MapView | null>(null);
-
   // Constants
   const MIN_ZOOM_DELTA = 0.008;
   const MAX_ZOOM_DELTA = 1.5;
+
   const initialRegion: Region = {
     latitude: 40.6782,
     longitude: -73.9442,
     latitudeDelta: MAX_ZOOM_DELTA,
     longitudeDelta: MAX_ZOOM_DELTA,
   };
+
+  const productInputData = {
+    title1: "Add Product Details",
+    title2: "Upload Product Photos",
+    slide1Text:
+      "Enter a detailed description of your product to attract customers.",
+    slide2Text: "Add clear and high-quality photos of the product.",
+    func1: () => console.log("Product description action triggered"),
+    func2: () => console.log("Photo upload action triggered"),
+  };
+
+  // State
+  const [view, setView] = useState<"map" | "list">("map");
+  const [region, setRegion] = useState<Region>(initialRegion);
+  const [internetModalVisible, setInternetModalVisible] = useState(false);
+  const [addProductModalVisible, setAddProductModalVisible] = useState(false);
+
+  const mapViewRef = useRef<MapView | null>(null);
 
   const iconColor = useThemeColor("icon");
   const backgroundColor = useThemeColor("background");
@@ -59,43 +60,39 @@ export function PostsScreen() {
 
   // Effects
   useEffect(() => {
-    // Setup connectivity listener
     const unsubscribe = setupConnectivityListener((connected) => {
       setInternetModalVisible(!connected);
     });
-    return unsubscribe; // Cleanup on unmount
+    return unsubscribe;
   }, []);
 
-  // Event Handlers
-  const retryConnection = () => {
-    isConnected()
-      .then(() => setInternetModalVisible(false))
-      .catch(() => setInternetModalVisible(true));
+  // Handlers
+  const retryConnection = async () => {
+    try {
+      await isConnected();
+      setInternetModalVisible(false);
+    } catch {
+      setInternetModalVisible(true);
+    }
   };
 
   const handleMarkerPress = (post: Post) => {
-    mapViewRef.current?.animateToRegion(
-      {
-        latitude: post.contact.latitude,
-        longitude: post.contact.longitude,
-        latitudeDelta: MIN_ZOOM_DELTA,
-        longitudeDelta: MIN_ZOOM_DELTA,
-      },
-      1000,
-    );
+    if (mapViewRef.current) {
+      mapViewRef.current.animateToRegion(
+        {
+          latitude: post.contact.latitude,
+          longitude: post.contact.longitude,
+          latitudeDelta: MIN_ZOOM_DELTA,
+          longitudeDelta: MIN_ZOOM_DELTA,
+        },
+        1000,
+      );
+    }
   };
 
   const handlePress = (postId: string) => navigate("PostDetail", { postId });
 
-  const closeTheInternetModal = () => setInternetModalVisible(false);
-
-  const handleFABPress = () => {
-    setAddProductModalVisible(true);
-  };
-
-  const handleCalloutPress = (postId: string) => {
-    navigate("PostDetail", { postId });
-  };
+  const handleFABPress = () => setAddProductModalVisible(true);
 
   return (
     <ThemedView style={styles.mainContainer}>
@@ -108,7 +105,7 @@ export function PostsScreen() {
         mapCustomStyle={mapCustomStyle}
         mapCustomStyleDark={mapCustomStyleDark}
         onMarkerPress={handleMarkerPress}
-        onCalloutPress={handleCalloutPress}
+        onCalloutPress={handlePress}
       />
 
       <FABButton onPress={handleFABPress} icon="plus" />
@@ -117,7 +114,7 @@ export function PostsScreen() {
         visible={internetModalVisible}
         backgroundColor={backgroundColor}
         onRetry={retryConnection}
-        onDismiss={closeTheInternetModal}
+        onDismiss={() => setInternetModalVisible(false)}
       />
 
       <SwiperTutorialModal
@@ -133,10 +130,6 @@ const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
   },
-  fullscreenMap: {
-    height: "100%",
-    width: "100%",
-  },
   modalContainer: {
     width: 300,
     padding: distances.md,
@@ -151,18 +144,6 @@ const styles = StyleSheet.create({
   },
   calloutContainer: {
     padding: distances.sm,
-    borderRadius: borderRadii.large,
-  },
-  calloutTitleContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: distances.xs,
-  },
-  calloutOverviewContainer: {
-    flexDirection: "column",
-  },
-  calloutContainer2: {
     borderRadius: borderRadii.large,
   },
   calloutTitle: {

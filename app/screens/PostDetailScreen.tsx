@@ -11,7 +11,6 @@ import { typography } from "app/aesthetic/typography";
 import { Header } from "app/components/common/Header";
 import { ThemedView } from "app/components/containers/ThemedView";
 import { ThemedText } from "app/components/texts/ThemedText";
-// If reused modal
 import { useData } from "app/hooks/useData";
 import { useThemeColor } from "app/hooks/useThemeColor";
 import { i18n } from "app/language";
@@ -31,53 +30,29 @@ import {
 import { Menu } from "react-native-paper";
 import { useDispatch, useSelector } from "react-redux";
 
-const ContactSection = ({
-  contact,
-  blueColor,
-  onPressPhone,
-  onLongPressPhone,
-  onCopyAddress,
-}) => (
-  <ThemedView style={styles.section}>
-    <ThemedText style={styles.sectionTitle}>{i18n.t("contact")}</ThemedText>
-    {contact.phoneNumber && (
-      <TouchableOpacity onPress={onPressPhone} onLongPress={onLongPressPhone}>
-        <ThemedText style={styles.contactItem}>
-          {i18n.t("phoneNumber")}:{" "}
-          <Text style={[styles.contactItemBlue, { color: blueColor }]}>
-            {contact.phoneNumber}
-          </Text>
-        </ThemedText>
-      </TouchableOpacity>
-    )}
-    <TouchableOpacity onPress={onCopyAddress} onLongPress={onCopyAddress}>
-      <ThemedText style={styles.contactItem}>
-        {i18n.t("address")}: {contact.fullAddress}
-      </ThemedText>
-    </TouchableOpacity>
-  </ThemedView>
-);
-
 const PostDetailScreen = () => {
+  // Hooks
   const { goBack } = useNavigation();
   const route = useRoute();
   const { postId } = route.params;
-
-  const [menuVisible, setMenuVisible] = useState(false);
-
+  const posts = useData();
   const dispatch = useDispatch();
   const { showSnackbar } = useSnackbar();
-  const posts = useData();
   const bookmarkedPosts = useSelector(selectBookmarkedPosts);
 
+  // Theme
   const iconColor = useThemeColor("icon");
   const backgroundColor = useThemeColor("background");
   const blueColor = useThemeColor("blue");
 
-  const post = posts.find((item) => item._id === postId);
+  // State
+  const [menuVisible, setMenuVisible] = useState(false);
 
+  // Data
+  const post = posts.find((item) => item._id === postId);
   const isBookmarked = bookmarkedPosts.some((item) => item._id === post?._id);
 
+  // Event Handlers
   const handleBookmarkToggle = () => {
     if (isBookmarked) {
       dispatch(removeBookmark(post._id));
@@ -99,21 +74,20 @@ const PostDetailScreen = () => {
     showSnackbar(i18n.t("addressCopied"), i18n.t("okay"));
   };
 
-  const handlePhonePress = () => {
+  const handlePhonePress = () =>
     Linking.openURL(`tel:0${post.contact.phoneNumber}`);
-  };
-
   const handlePhoneLongPress = () => {
     Clipboard.setStringAsync(`0${post.contact.phoneNumber}`);
     showSnackbar(i18n.t("phoneNumberCopied"), i18n.t("okay"));
   };
 
   const openMenu = () => setMenuVisible(true);
-
   const closeMenu = () => setMenuVisible(false);
 
+  // If post is not found
   if (!post) return <Text>{i18n.t("notFound")}</Text>;
 
+  // Render
   return (
     <ScrollView
       style={[styles.scrollContainer, { backgroundColor }]}
@@ -184,13 +158,32 @@ const PostDetailScreen = () => {
         </ThemedText>
         <ThemedText style={styles.description}>{post.description}</ThemedText>
 
-        <ContactSection
-          contact={post.contact}
-          blueColor={blueColor}
-          onPressPhone={handlePhonePress}
-          onLongPressPhone={handlePhoneLongPress}
-          onCopyAddress={handleCopyAddress}
-        />
+        <ThemedView style={styles.section}>
+          <ThemedText style={styles.sectionTitle}>
+            {i18n.t("contact")}
+          </ThemedText>
+          {post.contact.phoneNumber && (
+            <TouchableOpacity
+              onPress={handlePhonePress}
+              onLongPress={handlePhoneLongPress}
+            >
+              <ThemedText style={styles.contactItem}>
+                {i18n.t("phoneNumber")}:{" "}
+                <Text style={[styles.contactItemBlue, { color: blueColor }]}>
+                  {post.contact.phoneNumber}
+                </Text>
+              </ThemedText>
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity
+            onPress={handleCopyAddress}
+            onLongPress={handleCopyAddress}
+          >
+            <ThemedText style={styles.contactItem}>
+              {i18n.t("address")}: {post.contact.fullAddress}
+            </ThemedText>
+          </TouchableOpacity>
+        </ThemedView>
       </ThemedView>
     </ScrollView>
   );

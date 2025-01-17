@@ -15,52 +15,46 @@ interface PostCoverImage {
 }
 
 interface Post {
-  id: string;
+  _id: string;
   name: string;
   description: string;
   logoUrl: string;
   coverImages: PostCoverImage[];
 }
 
-interface PostItemProps {
+interface BookmarkComponentProps {
   item: Post;
 }
 
-const postCoverImageSize = 200;
-
-const BookmarkComponent: React.FC<PostItemProps> = ({ item }) => {
+const BookmarkComponent: React.FC<BookmarkComponentProps> = ({ item }) => {
   const iconColor = useThemeColor("icon");
-  const { navigate } = useNavigation();
+  const navigation = useNavigation();
 
-  const handlePress = (postId: string) => {
-    navigate("PostDetail", { postId: item._id });
+  const handlePress = () => {
+    navigation.navigate("PostDetail", { postId: item._id });
   };
 
-  if (item) {
-    return (
-      <TouchableOpacity onPress={handlePress} style={styles.postListItem}>
-        <ThemedView style={styles.postListItemInner}>
-          <ThemedView style={{ flexDirection: "row" }}>
-            <Image
-              source={{ uri: item.logoUrl || item.coverImages[0]?.imageUrl }}
-              resizeMode="stretch"
-              style={styles.postLogo}
-            />
-            <ThemedView style={styles.calloutTitleContainer}>
-              <ThemedView style={styles.calloutOverviewContainer}>
-                <ThemedText numberOfLines={1} style={styles.calloutTitle}>
-                  {item.name}
-                </ThemedText>
-              </ThemedView>
-              <Ionicons name="arrow-forward" size={20} color={iconColor} />
-            </ThemedView>
+  return (
+    <TouchableOpacity onPress={handlePress} style={styles.postListItem}>
+      <ThemedView style={styles.postListItemInner}>
+        <ThemedView style={styles.headerContainer}>
+          <Image
+            source={{ uri: item.logoUrl || item.coverImages[0]?.imageUrl }}
+            resizeMode="stretch"
+            style={styles.postLogo}
+          />
+          <ThemedView style={styles.titleContainer}>
+            <ThemedText numberOfLines={1} style={styles.title}>
+              {item.name}
+            </ThemedText>
+            <Ionicons name="arrow-forward" size={20} color={iconColor} />
           </ThemedView>
-
-          <ThemedText style={styles.description}>{item.description}</ThemedText>
         </ThemedView>
-      </TouchableOpacity>
-    );
-  }
+
+        <ThemedText style={styles.description}>{item.description}</ThemedText>
+      </ThemedView>
+    </TouchableOpacity>
+  );
 };
 
 const styles = StyleSheet.create({
@@ -73,24 +67,9 @@ const styles = StyleSheet.create({
     paddingBottom: distances.md,
     borderBottomWidth: dividerHeight,
   },
-  calloutType: {
-    fontSize: 12,
-    fontFamily: typography.secondary.semiBold,
-  },
-  calloutTitle: {
-    fontSize: 16,
-    fontFamily: typography.primary.bold,
-    paddingRight: distances.sm,
-  },
-  title: {
-    fontSize: 18,
-    fontFamily: typography.primary.bold,
-    marginBottom: distances.xxs,
-  },
-  description: {
-    fontSize: 14,
-    fontFamily: typography.secondary.regular,
-    marginTop: distances.xs,
+  headerContainer: {
+    flexDirection: "row",
+    alignItems: "center",
   },
   postLogo: {
     width: 50,
@@ -98,22 +77,23 @@ const styles = StyleSheet.create({
     borderRadius: borderRadii.medium,
     marginRight: distances.sm,
   },
-  postCoverImage: {
-    width: postCoverImageSize,
-    height: postCoverImageSize,
-    marginRight: distances.sm,
-    borderRadius: borderRadii.medium,
-  },
-  calloutOverviewContainer: {
-    flexDirection: "column",
-  },
-  calloutTitleContainer: {
+  titleContainer: {
     flex: 1,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: distances.xs,
     paddingRight: distances.xs,
+  },
+  title: {
+    fontSize: 16,
+    fontFamily: typography.primary.bold,
+    paddingRight: distances.sm,
+  },
+  description: {
+    fontSize: 14,
+    fontFamily: typography.secondary.regular,
+    marginTop: distances.xs,
   },
 });
 
