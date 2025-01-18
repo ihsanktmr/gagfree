@@ -7,6 +7,8 @@ import MainTabBar from "app/components/common/GFTabBar";
 import { selectIsOnboardingSeen } from "app/redux/misc/selectors";
 import { setTheme } from "app/redux/theme/actions";
 import { BookmarksScreen } from "app/screens/BookmarksScreen";
+import ChatDetailScreen from "app/screens/ChatDetailScreen";
+import { ChatsScreen } from "app/screens/ChatsScreen";
 import { NotificationsScreen } from "app/screens/NotificationsScreen";
 // Import screens
 import { OnboardingScreen } from "app/screens/OnboardingScreen";
@@ -31,6 +33,11 @@ export function MainTab() {
         name="Posts"
         options={{ headerShown: false }}
         component={PostsScreen}
+      />
+      <Tabs.Screen
+        name="Chats"
+        options={{ headerShown: false }}
+        component={ChatsScreen}
       />
       <Tabs.Screen
         name="Settings"
@@ -79,6 +86,11 @@ function RootStack() {
       <Stack.Screen
         name="PostDetail"
         component={PostDetailScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="ChatDetail"
+        component={ChatDetailScreen}
         options={{ headerShown: false }}
       />
       <Stack.Screen

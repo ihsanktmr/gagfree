@@ -53,6 +53,9 @@ export const MainTabBar: React.FC<MainTabBarProps> = ({
           } else if (route.name === "Settings") {
             icon = <Ionicons name="settings" size={24} color={iconColor} />;
             label = i18n.t("settings");
+          } else if (route.name === "Chats") {
+            icon = <Ionicons name="text" size={24} color={iconColor} />;
+            label = i18n.t("chats");
           }
 
           const { options } = descriptors[route.key];
@@ -101,7 +104,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     borderRadius: 15,
-    width: "35%",
+    width: "45%",
     position: "absolute",
     bottom: mainTabBarBottomMargin,
     alignItems: "center",
