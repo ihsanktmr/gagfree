@@ -1,12 +1,15 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import { distances } from "app/aesthetic/distances";
 import { borderRadii } from "app/aesthetic/styleConstants";
+import { useThemeColor } from "app/hooks/useThemeColor";
 import { i18n } from "app/language";
 import { StyleSheet, Text, View } from "react-native";
 import { Button, Modal } from "react-native-paper";
 import Swiper from "react-native-swiper";
-import { useDispatch } from "react-redux";
+
+import { ThemedView } from "../containers/ThemedView";
+import { ThemedText } from "../texts/ThemedText";
 
 interface SwiperTutorialModalProps {
   visible: boolean;
@@ -26,7 +29,7 @@ export const SwiperTutorialModal: React.FC<SwiperTutorialModalProps> = ({
   onDismiss,
   data,
 }) => {
-  const dispatch = useDispatch();
+  const backgroundColor = useThemeColor("background");
   const swiperRef = useRef<Swiper>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -48,9 +51,10 @@ export const SwiperTutorialModal: React.FC<SwiperTutorialModalProps> = ({
     <Modal
       visible={visible}
       onDismiss={onDismiss}
-      contentContainerStyle={styles.modalContainer}
+      style={styles.modalStyle}
+      contentContainerStyle={[styles.modalContainer, { backgroundColor }]}
     >
-      <View
+      <ThemedView
         style={[
           styles.modalContent,
           {
@@ -59,9 +63,9 @@ export const SwiperTutorialModal: React.FC<SwiperTutorialModalProps> = ({
         ]}
       >
         <View style={styles.titleContainer}>
-          <Text style={styles.title}>
+          <ThemedText style={styles.title}>
             {currentIndex === 0 ? data.title1 : data.title2}
-          </Text>
+          </ThemedText>
         </View>
         <Swiper
           ref={swiperRef}
@@ -72,14 +76,14 @@ export const SwiperTutorialModal: React.FC<SwiperTutorialModalProps> = ({
           removeClippedSubviews={true}
           onIndexChanged={setCurrentIndex}
         >
-          <View>
-            <Text style={styles.bodyText}>{data.slide1Text}</Text>
-          </View>
-          <View>
-            <Text style={styles.bodyText}>{data.slide2Text}</Text>
-          </View>
+          <ThemedView>
+            <ThemedText style={styles.bodyText}>{data.slide1Text}</ThemedText>
+          </ThemedView>
+          <ThemedView>
+            <ThemedText style={styles.bodyText}>{data.slide2Text}</ThemedText>
+          </ThemedView>
         </Swiper>
-        <View style={styles.buttonContainer}>
+        <ThemedView style={styles.buttonContainer}>
           {currentIndex === 0 ? (
             <Button mode="contained" onPress={handleFunc1}>
               {i18n.t("okay")}
@@ -89,18 +93,22 @@ export const SwiperTutorialModal: React.FC<SwiperTutorialModalProps> = ({
               {i18n.t("okay")}
             </Button>
           )}
-        </View>
-      </View>
+        </ThemedView>
+      </ThemedView>
     </Modal>
   );
 };
 
 const styles = StyleSheet.create({
   modalContainer: {
-    alignSelf: "center",
-    width: "90%",
+    width: "80%",
+    marginHorizontal: distances.md,
+    padding: distances.md,
     borderRadius: borderRadii.large,
-    backgroundColor: "white",
+  },
+  modalStyle: {
+    justifyContent: "center",
+    alignItems: "center",
   },
   modalContent: {
     paddingVertical: distances.md,
@@ -112,11 +120,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: "bold",
-    textAlign: "center",
+    textAlign: "left",
   },
   bodyText: {
     fontSize: 14,
-    textAlign: "center",
+    textAlign: "left",
     marginHorizontal: distances.md,
   },
   buttonContainer: {

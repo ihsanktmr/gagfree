@@ -3,27 +3,29 @@ import React from "react";
 import { distances } from "app/aesthetic/distances";
 import { borderRadii } from "app/aesthetic/styleConstants";
 import { ThemedText } from "app/components/texts/ThemedText";
+import { useThemeColor } from "app/hooks/useThemeColor";
 import { i18n } from "app/language";
 import { StyleSheet, View } from "react-native";
 import { Button, Modal } from "react-native-paper";
 
 interface InternetModalProps {
   visible: boolean;
-  backgroundColor: string;
   onRetry: () => void;
   onDismiss: () => void;
 }
 
 export const InternetModal: React.FC<InternetModalProps> = ({
   visible,
-  backgroundColor,
   onRetry,
   onDismiss,
 }) => {
+  const backgroundColor = useThemeColor("background");
+
   return (
     <Modal
       visible={visible}
       onDismiss={onDismiss}
+      style={styles.modalStyle}
       contentContainerStyle={[styles.modalContainer, { backgroundColor }]}
     >
       <ThemedText style={styles.modalText}>{i18n.t("noInternet")}</ThemedText>
@@ -42,9 +44,14 @@ export const InternetModal: React.FC<InternetModalProps> = ({
 
 const styles = StyleSheet.create({
   modalContainer: {
-    width: 300,
+    width: "80%",
+    marginHorizontal: distances.md,
     padding: distances.md,
     borderRadius: borderRadii.large,
+  },
+  modalStyle: {
+    justifyContent: "center",
+    alignItems: "center",
   },
   modalText: {
     fontSize: 14,

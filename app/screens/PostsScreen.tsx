@@ -112,7 +112,6 @@ export function PostsScreen() {
 
       <InternetModal
         visible={internetModalVisible}
-        backgroundColor={backgroundColor}
         onRetry={retryConnection}
         onDismiss={() => setInternetModalVisible(false)}
       />
@@ -129,35 +128,7 @@ export function PostsScreen() {
 const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
-  },
-  modalContainer: {
-    width: 300,
-    padding: distances.md,
-    borderRadius: borderRadii.large,
-  },
-  modalActions: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
-  },
-  modalSpacer: {
-    width: 10,
-  },
-  calloutContainer: {
-    padding: distances.sm,
-    borderRadius: borderRadii.large,
-  },
-  calloutTitle: {
-    fontSize: 16,
-    fontFamily: typography.primary.bold,
-  },
-  calloutDescription: {
-    fontSize: 12,
-    fontFamily: typography.secondary.regular,
-    marginBottom: distances.sm,
-  },
-  calloutImage: {
-    width: "100%",
-    height: 100,
-    borderRadius: borderRadii.medium,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
