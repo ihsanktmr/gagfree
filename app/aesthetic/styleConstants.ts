@@ -87,3 +87,4 @@ export const dividerHeight = 0.25;
 export const scrollViewBottomGap = 75;
 export const searchInputTopMargin = 30;
 export const searchInputHeight = 30;
+export const flatListBottomGap = 100;

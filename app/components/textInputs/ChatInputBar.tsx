@@ -1,10 +1,13 @@
 import React, { useState } from "react";
 
-import { Ionicons } from "@expo/vector-icons";
+import Feather from "@expo/vector-icons/Feather";
 import { distances } from "app/aesthetic/distances";
 import { borderRadii } from "app/aesthetic/styleConstants";
+import { typography } from "app/aesthetic/typography";
 import { useThemeColor } from "app/hooks/useThemeColor";
-import { StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
+import { StyleSheet, TextInput, TouchableOpacity } from "react-native";
+
+import { ThemedView } from "../containers/ThemedView";
 
 interface ChatInputBarProps {
   onSendMessage: (text: string) => void;
@@ -12,8 +15,9 @@ interface ChatInputBarProps {
 
 const ChatInputBar: React.FC<ChatInputBarProps> = ({ onSendMessage }) => {
   const [text, setText] = useState("");
-  const backgroundColor = useThemeColor("tabIconDefault");
-  const iconColor = useThemeColor("icon");
+  const textColor = useThemeColor("text");
+  const mainColor = useThemeColor("main");
+  const blueColor = useThemeColor("blue");
 
   const handleSend = () => {
     if (text.trim()) {
@@ -23,18 +27,18 @@ const ChatInputBar: React.FC<ChatInputBarProps> = ({ onSendMessage }) => {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor }]}>
+    <ThemedView style={styles.container}>
       <TextInput
-        style={styles.input}
+        style={{ ...styles.input, color: blueColor }}
         value={text}
         onChangeText={setText}
         placeholder="Type a message..."
-        placeholderTextColor="gray"
+        placeholderTextColor={textColor}
       />
-      <TouchableOpacity onPress={handleSend}>
-        <Ionicons name="send" size={24} color={iconColor} />
+      <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
+        <Feather name="send" size={24} color={mainColor} />
       </TouchableOpacity>
-    </View>
+    </ThemedView>
   );
 };
 
@@ -49,8 +53,13 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
+    fontFamily: typography.primary.bold,
     marginRight: distances.sm,
     padding: distances.xs,
+    borderRadius: borderRadii.small,
+  },
+  sendButton: {
+    paddingHorizontal: distances.lg,
     borderRadius: borderRadii.small,
   },
 });

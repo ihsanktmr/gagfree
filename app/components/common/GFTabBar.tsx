@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { Entypo, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import {
   getBottomTabBarHeight,
   mainTabBarBottomMargin,
@@ -54,7 +54,7 @@ export const MainTabBar: React.FC<MainTabBarProps> = ({
             icon = <Ionicons name="settings" size={24} color={iconColor} />;
             label = i18n.t("settings");
           } else if (route.name === "Chats") {
-            icon = <Ionicons name="text" size={24} color={iconColor} />;
+            icon = <Entypo name="chat" size={24} color={iconColor} />;
             label = i18n.t("chats");
           }
 

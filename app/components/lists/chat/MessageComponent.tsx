@@ -20,11 +20,9 @@ interface MessageComponentProps {
 
 const MessageComponent: React.FC<MessageComponentProps> = ({ message }) => {
   const backgroundColor = useThemeColor(
-    message.sender === "user" ? "text" : "background",
+    message.sender === "user" ? "text" : "blue",
   );
-  const textColor = useThemeColor(
-    message.sender === "user" ? "text" : "background",
-  );
+  const textColor = useThemeColor(message.sender === "user" ? "blue" : "text");
 
   return (
     <View

@@ -1,5 +1,10 @@
-import React from "react";
+import React, { forwardRef, useImperativeHandle, useRef } from "react";
 
+import { distances } from "app/aesthetic/distances";
+import {
+  flatListBottomGap,
+  genericSpacing,
+} from "app/aesthetic/styleConstants";
 import { FlatList, StyleSheet } from "react-native";
 
 import MessageComponent from "./MessageComponent";
@@ -15,22 +20,25 @@ interface MessageListProps {
   messages: Message[];
 }
 
-const MessageList: React.FC<MessageListProps> = ({ messages }) => {
+const MessageList = forwardRef(({ messages }: MessageListProps, ref) => {
   return (
     <FlatList
+      ref={ref}
       data={messages}
       renderItem={({ item }) => <MessageComponent message={item} />}
       keyExtractor={(item) => item.id}
-      contentContainerStyle={styles.container}
+      style={styles.container}
       showsVerticalScrollIndicator={false}
     />
   );
-};
+});
 
 const styles = StyleSheet.create({
   container: {
-    paddingVertical: 10,
-    paddingHorizontal: 15,
+    flex: 1,
+    paddingTop: distances.lg,
+    paddingBottom: flatListBottomGap,
+    paddingHorizontal: genericSpacing,
   },
 });
 

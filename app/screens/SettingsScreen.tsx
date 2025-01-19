@@ -88,10 +88,10 @@ export function SettingsScreen() {
           icon={<Entypo name="bookmarks" size={24} color={iconColor} />}
           nextIcon={true}
         />
-         <SettingButton
+        <SettingButton
           onPress={handleNotifications}
           name={i18n.t("notifications")}
-          icon={<Entypo name="bookmarks" size={24} color={iconColor} />}
+          icon={<Ionicons name="notifications" size={24} color={iconColor} />}
           nextIcon={true}
         />
         <SettingButton

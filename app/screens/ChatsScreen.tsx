@@ -48,11 +48,7 @@ export function ChatsScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <Header
-        title="Chats"
-        leftIcon={<Entypo name="chevron-left" size={24} color={iconColor} />}
-        onLeftPress={handleGoBack}
-      />
+      <Header title="Chats" />
       <ChatList
         chats={mockChats}
         onChatPress={(chatId, chatTitle) => handleChatPress(chatId, chatTitle)}
