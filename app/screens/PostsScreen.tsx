@@ -1,9 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 
 import { useNavigation } from "@react-navigation/native";
-import { distances } from "app/aesthetic/distances";
-import { borderRadii } from "app/aesthetic/styleConstants";
-import { typography } from "app/aesthetic/typography";
 import { mapCustomStyle, mapCustomStyleDark } from "app/appInfo";
 import { FABButton } from "app/components/buttons/FABButton";
 import { MapViewComponent } from "app/components/common/GFMapView";

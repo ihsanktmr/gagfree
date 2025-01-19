@@ -1,12 +1,10 @@
 import React from "react";
 
-import { Entypo } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { distances } from "app/aesthetic/distances";
 import { Header } from "app/components/common/Header";
 import { ThemedView } from "app/components/containers/ThemedView";
 import ChatList from "app/components/lists/chat/ChatList";
-import { useThemeColor } from "app/hooks/useThemeColor";
 import { StyleSheet } from "react-native";
 
 const mockChats = [
@@ -38,9 +36,6 @@ const mockChats = [
 
 export function ChatsScreen() {
   const navigation = useNavigation();
-  const iconColor = useThemeColor("icon");
-
-  const handleGoBack = () => navigation.goBack();
 
   const handleChatPress = (chatId: string, chatTitle: string) => {
     navigation.navigate("ChatDetail", { chatId, chatTitle });
