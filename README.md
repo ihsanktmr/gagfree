@@ -17,14 +17,6 @@ GAGFree (Give Away, Get Free) is a platform designed to connect people who want 
 - **Community Building**: Create connections through acts of giving and sharing.
 - **Social Impact**: Help those in need by redistributing resources.
 
----
-
-### How to Contribute
-
-We welcome contributions! Feel free to fork this repository, suggest improvements, or submit pull requests. Check out the [Contributing Guidelines](CONTRIBUTING.md) for more details.
-
----
-
 ### Tech Stack
 
 - **Frontend**: React Native
@@ -32,14 +24,36 @@ We welcome contributions! Feel free to fork this repository, suggest improvement
 - **Database**: MongoDB
 - **Authentication**: Firebase/Auth0
 
----
+## Installation
 
-### Getting Started
+### Prerequisites
+
+- Node.js
+- yarn
+
+### Steps to install
 
 1. Clone the repository:
-   ```bash
-   git clone https://github.com/ihsanktmr/gagfree.git
-   ```
+
+```bash
+git clone https://github.com/ihsanktmr/gagfree.git
+```
+
+2. Navigate to the project directory:
+
+```bash
+cd gagfree
+```
+
+3. Install the dependencies:
+
+```bash
+yarn
+```
+
+### How to Contribute
+
+We welcome contributions! Feel free to fork this repository, suggest improvements, or submit pull requests. Check out the [Contributing Guidelines](CONTRIBUTING.md) for more details.
 
 ## License
 
