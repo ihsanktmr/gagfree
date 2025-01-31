@@ -3,17 +3,9 @@ import React from "react";
 import { typography } from "app/aesthetic/typography";
 import { ThemedText } from "app/components/texts/ThemedText";
 import { useThemeColor } from "app/hooks/useThemeColor";
-import { i18n } from "app/language";
 import { FlatList, StyleSheet } from "react-native";
 
-import NotificationComponent from "./NotificationComponent";
-
-interface Notification {
-  id: string;
-  message: string;
-  timestamp: string; // ISO string format
-  iconName: string;
-}
+import NotificationComponent, { Notification } from "./NotificationComponent";
 
 interface NotificationListProps {
   notifications: Notification[];
@@ -31,7 +23,6 @@ const NotificationList: React.FC<NotificationListProps> = ({
       keyExtractor={(item) => item.id}
       ListEmptyComponent={
         <ThemedText style={styles.emptyMessage}>
-          {/*  {i18n.t("notificationEmptyText", "No notifications available.")} */}
           No notifications available.
         </ThemedText>
       }
