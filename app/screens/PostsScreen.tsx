@@ -52,6 +52,7 @@ export function PostsScreen() {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const mapViewRef = useRef<MapView | null>(null);
+  const swiperRef = useRef<any>(null);
 
   const iconColor = useThemeColor("icon");
   const backgroundColor = useThemeColor("background");
@@ -160,108 +161,188 @@ export function PostsScreen() {
   const handleFABPress = () => setAddProductModalVisible(true);
 
   const validateBasicInfo = () => {
-    // Replace these with actual form values
-    const title = "test";
-    const description = "test";
-    const category = "test";
-    const images = [];
-
-    if (!title.trim()) {
+    if (!itemDetails.title.trim()) {
       Alert.alert("Error", "Please enter a title for your item");
       return false;
     }
 
-    if (!description.trim() || description.length < 20) {
+    if (!itemDetails.description.trim()) {
+      Alert.alert("Error", "Please provide a description");
+      return false;
+    }
+
+    if (itemDetails.description.length < 20) {
       Alert.alert(
         "Error",
-        "Please provide a detailed description (minimum 20 characters)",
+        "Please provide a more detailed description (minimum 20 characters)",
       );
       return false;
     }
 
-    if (!category) {
+    if (!itemDetails.category) {
       Alert.alert("Error", "Please select a category");
       return false;
     }
 
-    if (images.length === 0) {
+    if (itemDetails.images.length === 0) {
       Alert.alert("Error", "Please add at least one image");
       return false;
     }
 
+    // If all validations pass
+    swiperRef.current?.scrollBy(1);
+    setCurrentIndex(1);
     return true;
   };
 
   const validatePricing = () => {
-    // For giveaway items, we'll validate location and availability instead
-    // Replace these with actual form values
-    const location = {
-      latitude: 0,
-      longitude: 0,
-      address: "",
-    };
-    const pickupTimes = [];
-    const contactMethod = "";
-
-    if (!location.address) {
+    if (!pickupDetails.location.address.trim()) {
       Alert.alert("Error", "Please specify a pickup location");
       return false;
     }
 
-    if (pickupTimes.length === 0) {
-      Alert.alert("Error", "Please specify at least one pickup time slot");
+    if (pickupDetails.pickupTimes.length === 0) {
+      Alert.alert("Error", "Please specify at least one pickup time");
       return false;
     }
 
-    if (!contactMethod) {
+    if (!pickupDetails.contactMethod) {
       Alert.alert("Error", "Please specify how you want to be contacted");
       return false;
     }
 
+    if (!pickupDetails.contactDetails.trim()) {
+      Alert.alert("Error", "Please provide your contact details");
+      return false;
+    }
+
+    // Validate contact details format based on method
+    if (pickupDetails.contactMethod === "email") {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(pickupDetails.contactDetails)) {
+        Alert.alert("Error", "Please enter a valid email address");
+        return false;
+      }
+    } else if (pickupDetails.contactMethod === "phone") {
+      const phoneRegex = /^\+?[\d\s-]{10,}$/;
+      if (!phoneRegex.test(pickupDetails.contactDetails)) {
+        Alert.alert("Error", "Please enter a valid phone number");
+        return false;
+      }
+    }
+
+    // If all validations pass
+    swiperRef.current?.scrollBy(1);
+    setCurrentIndex(2);
     return true;
   };
 
   const submitProduct = async () => {
     try {
-      // Collect all the product data from your form/state
+      // Collect all the product data from form state
       const productData = {
-        title: "", // Product name/title
-        description: "", // Detailed description
-        condition: "", // e.g., "New", "Like New", "Good", "Fair"
-        category: "", // e.g., "Furniture", "Electronics", "Clothing"
-        images: [], // Array of image URLs or image data
+        title: itemDetails.title,
+        description: itemDetails.description,
+        condition: "Good", // Default condition for now
+        category: itemDetails.category,
+        images:
+          itemDetails.images.length > 0
+            ? itemDetails.images
+            : [
+                // Default test image - replace with your actual default image URL
+                "https://via.placeholder.com/300",
+              ],
         location: {
-          latitude: 0,
-          longitude: 0,
-          address: "", // Pick-up address
+          // For testing, using initial region if no specific location is set
+          latitude: pickupDetails.location.latitude || initialRegion.latitude,
+          longitude:
+            pickupDetails.location.longitude || initialRegion.longitude,
+          address: pickupDetails.location.address,
+          additionalInfo: pickupDetails.location.additionalInfo,
         },
         contact: {
-          method: "", // Preferred contact method (e.g., "chat", "email", "phone")
-          details: "", // Contact information
+          method: pickupDetails.contactMethod,
+          details: pickupDetails.contactDetails,
         },
         availability: {
-          status: "available", // "available", "pending", "claimed"
-          pickupTimes: [], // Array of available pickup time slots
+          status: "available",
+          pickupTimes: pickupDetails.pickupTimes,
         },
         metadata: {
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
           isActive: true,
+          userId: "test-user-id", // Replace with actual user ID from auth
         },
       };
 
-      // Add your API call or storage logic here
+      // Validate required fields before submission
+      if (
+        !productData.title ||
+        !productData.description ||
+        !productData.category
+      ) {
+        Alert.alert(
+          "Missing Information",
+          "Please fill in all required fields before posting.",
+        );
+        return;
+      }
+
+      if (
+        !productData.location.address ||
+        productData.availability.pickupTimes.length === 0
+      ) {
+        Alert.alert(
+          "Missing Pickup Details",
+          "Please provide pickup location and available times.",
+        );
+        return;
+      }
+
+      // TODO: Add your API call here
       // await api.createProduct(productData);
+      console.log("Submitting product:", productData);
 
-      // Close the modal and reset form
+      // Reset all form state
+      setItemDetails({
+        title: "",
+        description: "",
+        category: "",
+        images: [],
+      });
+
+      setPickupDetails({
+        location: {
+          address: "",
+          additionalInfo: "",
+        },
+        pickupTimes: [],
+        contactMethod: "",
+        contactDetails: "",
+      });
+
+      // Close modal and show success message
       setAddProductModalVisible(false);
-      // Reset your form state here
+      setCurrentIndex(0); // Reset to first step for next time
 
-      // Show success message
-      Alert.alert("Success", "Product has been successfully created");
+      Alert.alert("Success!", "Your item has been successfully posted.", [
+        {
+          text: "OK",
+          onPress: () => {
+            // Optional: Navigate to the user's posts or refresh the map
+            // navigate('UserPosts');
+          },
+        },
+      ]);
     } catch (error) {
-      Alert.alert("Error", "Failed to create product. Please try again.");
       console.error("Error submitting product:", error);
+      Alert.alert("Error", "Failed to post your item. Please try again.", [
+        {
+          text: "OK",
+          style: "cancel",
+        },
+      ]);
     }
   };
 
@@ -318,6 +399,7 @@ export function PostsScreen() {
         steps={steps}
         currentIndex={currentIndex}
         setCurrentIndex={setCurrentIndex}
+        ref={swiperRef}
       >
         {renderStepContent(currentIndex)}
       </SwiperTutorialModal>

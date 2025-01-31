@@ -3,7 +3,6 @@ import React, { useEffect, useRef } from "react";
 import { distances } from "app/aesthetic/distances";
 import { borderRadii } from "app/aesthetic/styleConstants";
 import { useThemeColor } from "app/hooks/useThemeColor";
-import { i18n } from "app/language";
 import { StyleSheet, View } from "react-native";
 import { Button, Modal } from "react-native-paper";
 import Swiper from "react-native-swiper";
@@ -37,21 +36,28 @@ export const SwiperTutorialModal: React.FC<SwiperTutorialModalProps> = ({
   const swiperRef = useRef<Swiper>(null);
 
   useEffect(() => {
-    setCurrentIndex(0);
-  }, [visible]); // Reset index when modal visibility changes
+    if (visible) {
+      setCurrentIndex(0);
+    }
+  }, [visible, setCurrentIndex]);
 
-  const handleNextStep = () => {
+  const handleNextStep = async () => {
     const currentStep = steps[currentIndex];
+
     if (currentStep.onStepComplete) {
-      currentStep.onStepComplete();
+      const isValid = await currentStep.onStepComplete();
+
+      // Only proceed if validation passes
+      if (!isValid) {
+        return;
+      }
     }
 
-    if (currentIndex < steps.length - 1) {
-      swiperRef.current?.scrollBy(1);
-      setCurrentIndex(currentIndex + 1);
-    } else {
+    // Handle last step
+    if (currentIndex === steps.length - 1) {
       onDismiss();
       setCurrentIndex(0);
+      return;
     }
   };
 
@@ -86,7 +92,11 @@ export const SwiperTutorialModal: React.FC<SwiperTutorialModalProps> = ({
           </Swiper>
         </View>
         <ThemedView style={styles.buttonContainer}>
-          <Button mode="contained" onPress={handleNextStep}>
+          <Button
+            mode="contained"
+            onPress={handleNextStep}
+            style={styles.button}
+          >
             {steps[currentIndex].buttonText}
           </Button>
         </ThemedView>
@@ -137,5 +147,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginTop: distances.md,
     paddingVertical: distances.sm,
+  },
+  button: {
+    minWidth: 120, // Add minimum width for button
   },
 });
