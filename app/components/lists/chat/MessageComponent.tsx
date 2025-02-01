@@ -6,15 +6,15 @@ import { typography } from "app/aesthetic/typography";
 import { ThemedText } from "app/components/texts/ThemedText";
 import { useThemeColor } from "app/hooks/useThemeColor";
 import { Pressable, StyleSheet, View } from "react-native";
-import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import { Icon } from "react-native-paper";
 
 interface Message {
   id: string;
   text: string;
   timestamp: string;
   sender: "user" | "other";
-  status?: "sent" | "delivered" | "read"; // Add message status
-  isFirstInGroup?: boolean; // Add grouping support
+  status?: "sent" | "delivered" | "read";
+  isFirstInGroup?: boolean;
   isLastInGroup?: boolean;
 }
 
@@ -52,10 +52,9 @@ const MessageComponent: React.FC<MessageComponentProps> = ({
 
     return (
       <Icon
-        name={getStatusIcon()}
+        source={getStatusIcon()}
         size={14}
         color={message.status === "read" ? mainColor : "rgba(255,255,255,0.7)"}
-        style={styles.statusIcon}
       />
     );
   };

@@ -6,6 +6,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import MainTabBar from "app/components/common/GFTabBar";
 import { selectIsOnboardingSeen } from "app/redux/misc/selectors";
 import { setTheme } from "app/redux/theme/actions";
+import { ArchivedChatsScreen } from "app/screens/ArchivedChatsScreen";
 import { BookmarksScreen } from "app/screens/BookmarksScreen";
 import ChatDetailScreen from "app/screens/ChatDetailScreen";
 import { ChatsScreen } from "app/screens/ChatsScreen";
@@ -91,6 +92,11 @@ function RootStack() {
       <Stack.Screen
         name="ChatDetail"
         component={ChatDetailScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="ArchivedChats"
+        component={ArchivedChatsScreen}
         options={{ headerShown: false }}
       />
       <Stack.Screen

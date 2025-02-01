@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect, useRef, useState } from "react";
+import React, { forwardRef, useMemo } from "react";
 
 import { distances } from "app/aesthetic/distances";
 import {
@@ -23,93 +23,81 @@ interface MessageListProps {
   onVisibleMessagesChanged?: (messages: Message[]) => void;
 }
 
+const TIME_BETWEEN_GROUPS = 5 * 60 * 1000; // 5 minutes in milliseconds
+
 const MessageList = forwardRef<FlatList, MessageListProps>(
   ({ messages, onMessageLongPress, onVisibleMessagesChanged }, ref) => {
-    const [visibleMessages, setVisibleMessages] = useState<string[]>([]);
-    const previousMessagesLength = useRef(messages.length);
+    const groupedMessages = useMemo(() => {
+      return messages.map((message, index) => {
+        const prevMessage = index > 0 ? messages[index - 1] : null;
+        const nextMessage =
+          index < messages.length - 1 ? messages[index + 1] : null;
 
-    useEffect(() => {
-      // Check if new messages were added
-      if (messages.length > previousMessagesLength.current) {
-        // If the last message is from the user, scroll to bottom
-        const lastMessage = messages[messages.length - 1];
-        if (lastMessage.sender === "user") {
-          setTimeout(() => {
-            if (ref && "current" in ref && ref.current) {
-              ref.current.scrollToEnd({ animated: true });
-            }
-          }, 100); // Small delay to ensure render is complete
-        }
-      }
-      previousMessagesLength.current = messages.length;
+        const timeDiffWithPrev = prevMessage
+          ? new Date(message.timestamp).getTime() -
+            new Date(prevMessage.timestamp).getTime()
+          : Infinity;
+
+        const timeDiffWithNext = nextMessage
+          ? new Date(nextMessage.timestamp).getTime() -
+            new Date(message.timestamp).getTime()
+          : Infinity;
+
+        const isFirstInGroup =
+          !prevMessage ||
+          prevMessage.sender !== message.sender ||
+          timeDiffWithPrev > TIME_BETWEEN_GROUPS;
+
+        const isLastInGroup =
+          !nextMessage ||
+          nextMessage.sender !== message.sender ||
+          timeDiffWithNext > TIME_BETWEEN_GROUPS;
+
+        const showTimestamp =
+          isLastInGroup || timeDiffWithNext > TIME_BETWEEN_GROUPS;
+
+        return {
+          ...message,
+          isFirstInGroup,
+          isLastInGroup,
+          showTimestamp,
+        };
+      });
     }, [messages]);
 
-    const onViewableItemsChanged = ({
-      viewableItems,
+    const renderItem = ({
+      item: message,
+      index,
     }: {
-      viewableItems: ViewToken[];
+      item: Message & {
+        isFirstInGroup: boolean;
+        isLastInGroup: boolean;
+        showTimestamp: boolean;
+      };
+      index: number;
     }) => {
-      const visibleMessageIds = viewableItems.map((item) => item.key as string);
-      setVisibleMessages(visibleMessageIds);
-
-      if (onVisibleMessagesChanged) {
-        const visibleMessageObjects = messages.filter((msg) =>
-          visibleMessageIds.includes(msg.id),
-        );
-        onVisibleMessagesChanged(visibleMessageObjects);
-      }
-    };
-
-    const getMessageGrouping = (index: number) => {
-      const currentMessage = messages[index];
-      const prevMessage = index > 0 ? messages[index - 1] : null;
-      const nextMessage =
-        index < messages.length - 1 ? messages[index + 1] : null;
-
-      const isFirstInGroup =
-        !prevMessage ||
-        prevMessage.sender !== currentMessage.sender ||
-        new Date(currentMessage.timestamp).getTime() -
-          new Date(prevMessage.timestamp).getTime() >
-          60000;
-
-      const isLastInGroup =
-        !nextMessage ||
-        nextMessage.sender !== currentMessage.sender ||
-        new Date(nextMessage.timestamp).getTime() -
-          new Date(currentMessage.timestamp).getTime() >
-          60000;
-
-      return { isFirstInGroup, isLastInGroup };
+      return (
+        <MessageComponent message={message} onLongPress={onMessageLongPress} />
+      );
     };
 
     return (
       <FlatList
         ref={ref}
-        data={messages}
-        renderItem={({ item, index }) => (
-          <MessageComponent
-            message={{
-              ...item,
-              ...getMessageGrouping(index),
-            }}
-            onLongPress={onMessageLongPress}
-          />
-        )}
+        data={groupedMessages}
+        renderItem={renderItem}
         keyExtractor={(item) => item.id}
         style={styles.container}
         contentContainerStyle={styles.contentContainer}
         showsVerticalScrollIndicator={false}
-        onViewableItemsChanged={onViewableItemsChanged}
-        viewabilityConfig={{
-          itemVisiblePercentThreshold: 50,
-        }}
-        initialNumToRender={15}
-        maxToRenderPerBatch={10}
-        windowSize={21}
         maintainVisibleContentPosition={{
           minIndexForVisible: 0,
           autoscrollToTopThreshold: 10,
+        }}
+        onContentSizeChange={() => {
+          if (ref && "current" in ref && ref.current) {
+            ref.current.scrollToEnd({ animated: true });
+          }
         }}
       />
     );

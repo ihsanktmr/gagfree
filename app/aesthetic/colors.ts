@@ -12,6 +12,7 @@ export const Colors = {
     main: "#5A4FCF",
     blue: "#018FE4",
     transparentBackground: "rgba(255, 255, 255, 0.75)",
+    surface: "#fff",
   },
   dark: {
     text: "#ECEDEE",
@@ -23,5 +24,6 @@ export const Colors = {
     main: "#A5C9FF",
     blue: "#40A6E3",
     transparentBackground: "rgba(21, 23, 24, 0.75)",
+    surface: "#151718",
   },
 };

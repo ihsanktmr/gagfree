@@ -15,10 +15,11 @@ import miscReducer from "./misc/reducers";
 import { persistStorage } from "./persistStorage";
 import themeReducer from "./theme/reducers";
 import postsReducer from "./post/reducers";
-
+import chatReducer from "./chat/reducers";
 // Combine reducers
 const rootReducer = {
   misc: miscReducer,
+  chat: chatReducer,
   post: postsReducer,
   theme: themeReducer,
   language: languageReducer,
