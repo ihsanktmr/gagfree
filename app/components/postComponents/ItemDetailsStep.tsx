@@ -1,23 +1,23 @@
 import React, { useState } from "react";
 
-import { Picker } from "@react-native-picker/picker";
 import { distances } from "app/aesthetic/distances";
+import { typography } from "app/aesthetic/typography";
 import { useThemeColor } from "app/hooks/useThemeColor";
 import * as ImagePicker from "expo-image-picker";
-import { Image, ScrollView, StyleSheet, View } from "react-native";
-import { Button, HelperText, TextInput } from "react-native-paper";
+import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
+import { Image } from "react-native";
+import { Chip, IconButton, TextInput } from "react-native-paper";
 
-import { ThemedView } from "../containers/ThemedView";
 import { ThemedText } from "../texts/ThemedText";
 
-interface ItemDetailsStepProps {
+interface ItemDetailsProps {
   onUpdateData: (data: {
     title: string;
     description: string;
     category: string;
     images: string[];
   }) => void;
-  initialData?: {
+  initialData: {
     title: string;
     description: string;
     category: string;
@@ -26,37 +26,30 @@ interface ItemDetailsStepProps {
 }
 
 const categories = [
-  { label: "Select a category", value: "" },
-  { label: "Furniture", value: "furniture" },
-  { label: "Electronics", value: "electronics" },
-  { label: "Clothing", value: "clothing" },
-  { label: "Books", value: "books" },
-  { label: "Kitchen", value: "kitchen" },
-  { label: "Sports", value: "sports" },
-  { label: "Other", value: "other" },
+  "Furniture",
+  "Electronics",
+  "Clothing",
+  "Books",
+  "Kitchen",
+  "Sports",
+  "Toys",
+  "Other",
 ];
 
-export const ItemDetailsStep: React.FC<ItemDetailsStepProps> = ({
+export const ItemDetailsStep: React.FC<ItemDetailsProps> = ({
   onUpdateData,
   initialData,
 }) => {
-  const [title, setTitle] = useState(initialData?.title || "");
-  const [description, setDescription] = useState(
-    initialData?.description || "",
-  );
-  const [category, setCategory] = useState(initialData?.category || "");
-  const [images, setImages] = useState<string[]>(initialData?.images || []);
-  const [errors, setErrors] = useState({
-    title: "",
-    description: "",
-    category: "",
-    images: "",
-  });
+  const [title, setTitle] = useState(initialData.title);
+  const [description, setDescription] = useState(initialData.description);
+  const [category, setCategory] = useState(initialData.category);
+  const [images, setImages] = useState<string[]>(initialData.images);
 
-  const backgroundColor = useThemeColor("background");
   const textColor = useThemeColor("text");
+  const mainColor = useThemeColor("main");
+  const surfaceColor = useThemeColor("surface");
 
-  const pickImage = async () => {
+  const handleImagePick = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
@@ -78,10 +71,15 @@ export const ItemDetailsStep: React.FC<ItemDetailsStepProps> = ({
   const removeImage = (index: number) => {
     const newImages = images.filter((_, i) => i !== index);
     setImages(newImages);
-    onUpdateData({ title, description, category, images: newImages });
+    onUpdateData({
+      title,
+      description,
+      category,
+      images: newImages,
+    });
   };
 
-  const handleChange = (field: string, value: string) => {
+  const updateField = (field: string, value: string) => {
     switch (field) {
       case "title":
         setTitle(value);
@@ -93,80 +91,96 @@ export const ItemDetailsStep: React.FC<ItemDetailsStepProps> = ({
         setCategory(value);
         break;
     }
-    onUpdateData({ title, description, category, images });
+    onUpdateData({
+      title: field === "title" ? value : title,
+      description: field === "description" ? value : description,
+      category: field === "category" ? value : category,
+      images,
+    });
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <ThemedView style={styles.form}>
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      <View style={styles.section}>
+        <ThemedText style={styles.label}>Title</ThemedText>
         <TextInput
-          label="Item Title"
+          mode="outlined"
           value={title}
-          onChangeText={(value) => handleChange("title", value)}
-          mode="outlined"
-          error={!!errors.title}
+          onChangeText={(text) => updateField("title", text)}
+          placeholder="What are you giving away?"
           style={styles.input}
+          maxLength={50}
         />
-        <HelperText type="error" visible={!!errors.title}>
-          {errors.title}
-        </HelperText>
+      </View>
 
+      <View style={styles.section}>
+        <ThemedText style={styles.label}>Category</ThemedText>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.categoryContainer}
+        >
+          {categories.map((cat) => (
+            <Chip
+              key={cat}
+              selected={category === cat}
+              onPress={() => updateField("category", cat)}
+              style={[
+                styles.categoryChip,
+                category === cat && { backgroundColor: mainColor },
+              ]}
+              textStyle={[
+                styles.chipText,
+                category === cat && { color: "white" },
+              ]}
+            >
+              {cat}
+            </Chip>
+          ))}
+        </ScrollView>
+      </View>
+
+      <View style={styles.section}>
+        <ThemedText style={styles.label}>Description</ThemedText>
         <TextInput
-          label="Description"
-          value={description}
-          onChangeText={(value) => handleChange("description", value)}
           mode="outlined"
+          value={description}
+          onChangeText={(text) => updateField("description", text)}
+          placeholder="Describe your item (condition, size, etc.)"
           multiline
           numberOfLines={4}
-          error={!!errors.description}
           style={styles.input}
+          maxLength={500}
         />
-        <HelperText type="error" visible={!!errors.description}>
-          {errors.description}
-        </HelperText>
+      </View>
 
-        <View style={styles.pickerContainer}>
-          <Picker
-            selectedValue={category}
-            onValueChange={(value) => handleChange("category", value)}
-            style={[styles.picker, { backgroundColor, color: textColor }]}
-          >
-            {categories.map((cat) => (
-              <Picker.Item
-                key={cat.value}
-                label={cat.label}
-                value={cat.value}
+      <View style={styles.section}>
+        <ThemedText style={styles.label}>Photos</ThemedText>
+        <View style={styles.imageContainer}>
+          {images.map((uri, index) => (
+            <View key={index} style={styles.imageWrapper}>
+              <Image source={{ uri }} style={styles.image} />
+              <IconButton
+                icon="close-circle"
+                size={20}
+                style={styles.removeImage}
+                onPress={() => removeImage(index)}
               />
-            ))}
-          </Picker>
-        </View>
-
-        <View style={styles.imageSection}>
-          <ThemedText style={styles.imageTitle}>Photos</ThemedText>
-          <View style={styles.imageContainer}>
-            {images.map((uri, index) => (
-              <View key={index} style={styles.imageWrapper}>
-                <Image source={{ uri: uri }} style={styles.image} />
-                <Button
-                  icon="close"
-                  onPress={() => removeImage(index)}
-                  style={styles.removeButton}
-                  children={undefined}
-                />
-              </View>
-            ))}
-            {images.length < 5 && (
-              <Button
-                mode="outlined"
-                onPress={pickImage}
-                style={styles.addImageButton}
-              >
+            </View>
+          ))}
+          {images.length < 5 && (
+            <TouchableOpacity
+              style={[styles.addImageButton, { borderColor: mainColor }]}
+              onPress={handleImagePick}
+            >
+              <IconButton icon="camera-plus" size={24} iconColor={mainColor} />
+              <ThemedText style={[styles.addImageText, { color: mainColor }]}>
                 Add Photo
-              </Button>
-            )}
-          </View>
+              </ThemedText>
+            </TouchableOpacity>
+          )}
         </View>
-      </ThemedView>
+      </View>
     </ScrollView>
   );
 };
@@ -175,26 +189,28 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  form: {
-    padding: distances.md,
+  section: {
+    marginBottom: distances.lg,
+  },
+  label: {
+    fontSize: 16,
+    fontFamily: typography.primary.medium,
+    marginBottom: distances.xs,
   },
   input: {
-    marginBottom: distances.sm,
+    backgroundColor: "transparent",
   },
-  pickerContainer: {
-    marginBottom: distances.md,
-    borderRadius: 4,
-    overflow: "hidden",
+  categoryContainer: {
+    flexDirection: "row",
+    marginTop: distances.xs,
   },
-  picker: {
-    height: 50,
+  categoryChip: {
+    marginRight: distances.xs,
+    marginBottom: distances.xs,
   },
-  imageSection: {
-    marginTop: distances.md,
-  },
-  imageTitle: {
-    fontSize: 16,
-    marginBottom: distances.sm,
+  chipText: {
+    fontSize: 14,
+    fontFamily: typography.primary.regular,
   },
   imageContainer: {
     flexDirection: "row",
@@ -209,14 +225,25 @@ const styles = StyleSheet.create({
     height: 100,
     borderRadius: 8,
   },
-  removeButton: {
+  removeImage: {
     position: "absolute",
     top: -8,
     right: -8,
+    backgroundColor: "white",
+    borderRadius: 12,
   },
   addImageButton: {
     width: 100,
     height: 100,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderStyle: "dashed",
     justifyContent: "center",
+    alignItems: "center",
+  },
+  addImageText: {
+    fontSize: 12,
+    fontFamily: typography.primary.medium,
+    marginTop: -distances.xs,
   },
 });

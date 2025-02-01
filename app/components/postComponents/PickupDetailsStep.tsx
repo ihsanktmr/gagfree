@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Picker } from "@react-native-picker/picker";
 import { distances } from "app/aesthetic/distances";
+import { typography } from "app/aesthetic/typography";
 import { useThemeColor } from "app/hooks/useThemeColor";
 import { Platform } from "react-native";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { Button, Chip, TextInput } from "react-native-paper";
 
 import { ThemedView } from "../containers/ThemedView";
@@ -33,10 +35,55 @@ interface PickupDetailsStepProps {
 }
 
 const contactMethods = [
-  { label: "Select contact method", value: "" },
-  { label: "In-App Chat", value: "chat" },
-  { label: "Email", value: "email" },
-  { label: "Phone", value: "phone" },
+  {
+    id: "in-app",
+    label: "In-App Chat",
+    icon: "chat-processing",
+    placeholder: "Use in-app messaging",
+    keyboardType: "default",
+    isInApp: true,
+    description: "Chat directly within the app",
+  },
+  {
+    id: "phone",
+    label: "Phone",
+    icon: "phone",
+    placeholder: "Enter phone number",
+    keyboardType: "phone-pad",
+    validation: /^\+?[\d\s-]{10,}$/,
+    errorMessage: "Please enter a valid phone number",
+    description: "Share your phone number",
+  },
+  {
+    id: "whatsapp",
+    label: "WhatsApp",
+    icon: "whatsapp",
+    placeholder: "Enter WhatsApp number",
+    keyboardType: "phone-pad",
+    validation: /^\+?[\d\s-]{10,}$/,
+    errorMessage: "Please enter a valid WhatsApp number",
+    description: "Connect via WhatsApp",
+  },
+  {
+    id: "telegram",
+    label: "Telegram",
+    icon: "telegram",
+    placeholder: "Enter Telegram username",
+    keyboardType: "default",
+    validation: /^@?[a-zA-Z0-9_]{5,32}$/,
+    errorMessage: "Please enter a valid Telegram username",
+    description: "Connect on Telegram",
+  },
+  {
+    id: "email",
+    label: "Email",
+    icon: "email",
+    placeholder: "Enter email address",
+    keyboardType: "email-address",
+    validation: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+    errorMessage: "Please enter a valid email address",
+    description: "Communicate via email",
+  },
 ];
 
 export const PickupDetailsStep: React.FC<PickupDetailsStepProps> = ({
@@ -64,6 +111,10 @@ export const PickupDetailsStep: React.FC<PickupDetailsStepProps> = ({
   const backgroundColor = useThemeColor("background");
   const textColor = useThemeColor("text");
   const surfaceColor = useThemeColor("icon");
+  const mainColor = useThemeColor("main");
+
+  const [contactError, setContactError] = useState("");
+  const [isFocused, setIsFocused] = useState(false);
 
   const handleDateChange = (event: any, date?: Date) => {
     if (Platform.OS === "android") {
@@ -117,42 +168,19 @@ export const PickupDetailsStep: React.FC<PickupDetailsStepProps> = ({
     setShowDatePicker(true);
   };
 
-  const renderContactInput = () => {
-    let keyboardType: "default" | "email-address" | "phone-pad" = "default";
-    let placeholder = "Enter your preferred contact details";
+  const validateContact = (text: string) => {
+    const method = contactMethods.find((m) => m.id === contactMethod);
+    if (!method) return;
 
-    switch (contactMethod) {
-      case "email":
-        keyboardType = "email-address";
-        placeholder = "Enter your email address";
-        break;
-      case "phone":
-        keyboardType = "phone-pad";
-        placeholder = "Enter your phone number";
-        break;
-      case "chat":
-        placeholder = "Your username will be used for in-app chat";
-        break;
+    if (text && !method.validation.test(text)) {
+      setContactError(method.errorMessage);
+    } else {
+      setContactError("");
     }
-
-    return (
-      <TextInput
-        label="Contact Details"
-        value={contactDetails}
-        onChangeText={(value) => {
-          setContactDetails(value);
-          updateData({ contactDetails: value });
-        }}
-        mode="outlined"
-        placeholder={placeholder}
-        keyboardType={keyboardType}
-        style={styles.input}
-      />
-    );
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <ThemedView style={styles.form}>
         <View style={styles.section}>
           <ThemedText style={styles.sectionTitle}>Location Details</ThemedText>
@@ -260,54 +288,107 @@ export const PickupDetailsStep: React.FC<PickupDetailsStepProps> = ({
           >
             <View style={styles.pickerContainer}>
               <ThemedText style={styles.pickerLabel}>
-                How would you like to be contacted?
+                Preferred Contact Method
               </ThemedText>
-              <View
-                style={[
-                  styles.pickerWrapper,
-                  {
-                    backgroundColor: backgroundColor,
-                    borderColor: "rgba(0,0,0,0.2)",
-                  },
-                ]}
-              >
-                <Picker
-                  selectedValue={contactMethod}
-                  onValueChange={(value) => {
-                    setContactMethod(value);
-                    setContactDetails("");
-                    updateData({
-                      contactMethod: value,
-                      contactDetails: "",
-                    });
-                  }}
-                  style={[
-                    styles.picker,
-                    {
-                      color: textColor,
-                      backgroundColor: backgroundColor,
-                    },
-                  ]}
-                >
-                  {contactMethods.map((method) => (
-                    <Picker.Item
-                      key={method.value}
-                      label={method.label}
-                      value={method.value}
-                      color={textColor}
+              <View style={styles.contactMethodGrid}>
+                {contactMethods.map((method) => (
+                  <TouchableOpacity
+                    key={method.id}
+                    style={[
+                      styles.contactMethodCard,
+                      contactMethod === method.id && styles.selectedCard,
+                      { borderColor: mainColor },
+                    ]}
+                    onPress={() => {
+                      setContactMethod(method.id);
+                      if (method.isInApp) {
+                        setContactDetails("in-app-chat");
+                      } else {
+                        setContactDetails("");
+                      }
+                      setContactError("");
+                      updateData({
+                        contactMethod: method.id,
+                        contactDetails: method.isInApp ? "in-app-chat" : "",
+                      });
+                    }}
+                  >
+                    <MaterialCommunityIcons
+                      name={method.icon}
+                      size={24}
+                      color={
+                        contactMethod === method.id ? mainColor : textColor
+                      }
                     />
-                  ))}
-                </Picker>
+                    <ThemedText
+                      style={[
+                        styles.contactMethodLabel,
+                        contactMethod === method.id && { color: mainColor },
+                      ]}
+                    >
+                      {method.label}
+                    </ThemedText>
+                    <ThemedText style={styles.methodDescription}>
+                      {method.description}
+                    </ThemedText>
+                  </TouchableOpacity>
+                ))}
               </View>
             </View>
 
-            {contactMethod && contactMethod !== "" && (
-              <View style={styles.contactDetailsContainer}>
-                {renderContactInput()}
-                <ThemedText style={styles.helperText}>
-                  {contactMethod === "chat"
-                    ? "Other users will be able to contact you through the app's messaging system"
-                    : `We'll share this ${contactMethod} with the person who wants to pick up your item`}
+            {contactMethod &&
+              !contactMethods.find((m) => m.id === contactMethod)?.isInApp && (
+                <View style={styles.contactInputContainer}>
+                  <TextInput
+                    mode="outlined"
+                    value={contactDetails}
+                    onChangeText={(text) => {
+                      setContactDetails(text);
+                      validateContact(text);
+                      updateData({ contactDetails: text });
+                    }}
+                    onFocus={() => setIsFocused(true)}
+                    onBlur={() => {
+                      setIsFocused(false);
+                      validateContact(contactDetails);
+                    }}
+                    placeholder={
+                      contactMethods.find((m) => m.id === contactMethod)
+                        ?.placeholder
+                    }
+                    keyboardType={
+                      contactMethods.find((m) => m.id === contactMethod)
+                        ?.keyboardType
+                    }
+                    style={[
+                      styles.input,
+                      styles.marginTop,
+                      isFocused && styles.focusedInput,
+                    ]}
+                    error={!!contactError}
+                  />
+                  {contactError ? (
+                    <ThemedText style={styles.errorText}>
+                      {contactError}
+                    </ThemedText>
+                  ) : (
+                    <ThemedText style={styles.helperText}>
+                      This will be shared with interested people
+                    </ThemedText>
+                  )}
+                </View>
+              )}
+
+            {contactMethod === "in-app" && (
+              <View style={styles.inAppMessageContainer}>
+                <MaterialCommunityIcons
+                  name="check-circle"
+                  size={24}
+                  color={mainColor}
+                />
+                <ThemedText style={styles.inAppMessage}>
+                  People will be able to contact you directly through the app's
+                  messaging system
                 </ThemedText>
               </View>
             )}
@@ -412,6 +493,67 @@ const styles = StyleSheet.create({
     opacity: 0.7,
     marginTop: distances.sm,
     marginHorizontal: distances.xs,
+    lineHeight: 20,
+  },
+  contactMethodGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: distances.sm,
+    marginTop: distances.sm,
+  },
+  contactMethodCard: {
+    width: "47%",
+    padding: distances.md,
+    borderRadius: 12,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "transparent",
+    marginBottom: distances.xs,
+    minHeight: 120,
+  },
+  selectedCard: {
+    borderWidth: 2,
+    backgroundColor: "rgba(0, 0, 0, 0.05)",
+  },
+  contactMethodLabel: {
+    marginTop: distances.xs,
+    fontSize: 14,
+    fontFamily: typography.primary.bold,
+  },
+  contactInputContainer: {
+    marginTop: distances.md,
+  },
+  focusedInput: {
+    borderColor: "red",
+  },
+  errorText: {
+    color: "#ff4444",
+    fontSize: 12,
+    marginTop: 4,
+    marginLeft: 4,
+  },
+  marginTop: {
+    marginTop: distances.md,
+  },
+  methodDescription: {
+    fontSize: 12,
+    textAlign: "center",
+    marginTop: distances.xs,
+    opacity: 0.7,
+  },
+  inAppMessageContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.05)",
+    padding: distances.md,
+    borderRadius: 12,
+    marginTop: distances.md,
+  },
+  inAppMessage: {
+    flex: 1,
+    marginLeft: distances.sm,
+    fontSize: 14,
     lineHeight: 20,
   },
 });
