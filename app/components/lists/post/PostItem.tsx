@@ -8,19 +8,8 @@ import { typography } from "app/aesthetic/typography";
 import { ThemedView } from "app/components/containers/ThemedView";
 import { ThemedText } from "app/components/texts/ThemedText";
 import { useThemeColor } from "app/hooks/useThemeColor";
+import { Post } from "app/redux/post/types";
 import { Image, StyleSheet, TouchableOpacity } from "react-native";
-
-interface PostCoverImage {
-  imageUrl: string;
-}
-
-interface Post {
-  id: string;
-  name: string;
-  description: string;
-  logoUrl: string;
-  coverImages: PostCoverImage[];
-}
 
 interface PostItemProps {
   item: Post;
@@ -32,34 +21,38 @@ const PostItem: React.FC<PostItemProps> = ({ item }) => {
   const iconColor = useThemeColor("icon");
   const { navigate } = useNavigation();
 
-  const handlePress = (postId: string) => {
-    navigate("PostDetail", { postId: item._id });
+  const handlePress = () => {
+    navigate("PostDetail", { postId: item.id });
   };
+
+  const mainImage =
+    item.images && item.images.length > 0 ? item.images[0] : null;
 
   return (
     <TouchableOpacity onPress={handlePress} style={styles.postListItem}>
       <ThemedView style={styles.postListItemInner}>
         <ThemedView style={{ flexDirection: "row" }}>
           <Image
-            source={{ uri: item.logoUrl || item.coverImages[0]?.imageUrl }}
-            resizeMode="stretch"
+            source={{ uri: mainImage || "https://via.placeholder.com/50" }}
+            resizeMode="cover"
             style={styles.postLogo}
           />
           <ThemedView style={styles.calloutTitleContainer}>
             <ThemedView style={styles.calloutOverviewContainer}>
               <ThemedText numberOfLines={1} style={styles.calloutTitle}>
-                {item.name}
+                {item.title}
               </ThemedText>
-
               <ThemedText numberOfLines={1} style={styles.calloutType}>
-                {getPostType?.value}
+                {item.category}
               </ThemedText>
             </ThemedView>
             <Ionicons name="arrow-forward" size={20} color={iconColor} />
           </ThemedView>
         </ThemedView>
 
-        <ThemedText style={styles.description}>{item.description}</ThemedText>
+        <ThemedText style={styles.description} numberOfLines={2}>
+          {item.description}
+        </ThemedText>
       </ThemedView>
     </TouchableOpacity>
   );

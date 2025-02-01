@@ -3,14 +3,7 @@ import React, { useEffect, useRef } from "react";
 import { distances } from "app/aesthetic/distances";
 import { typography } from "app/aesthetic/typography";
 import { useThemeColor } from "app/hooks/useThemeColor";
-import {
-  Animated,
-  Platform,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Animated, StyleSheet, TextInput, View } from "react-native";
 import { IconButton } from "react-native-paper";
 
 import { ThemedText } from "../texts/ThemedText";
@@ -23,6 +16,8 @@ interface SearchHeaderProps {
   searchQuery: string;
   onSearchChange: (query: string) => void;
   rightIcon?: React.ReactNode;
+  hideSearchIcon?: boolean;
+  placeholder?: string;
 }
 
 export const SearchHeader: React.FC<SearchHeaderProps> = ({
@@ -33,6 +28,8 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
   searchQuery,
   onSearchChange,
   rightIcon,
+  hideSearchIcon = false,
+  placeholder = "Search...",
 }) => {
   const textColor = useThemeColor("text");
   const surfaceColor = useThemeColor("surface");
@@ -59,47 +56,27 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
     outputRange: [1, 0],
   });
 
-  const headerScale = searchAnimation.interpolate({
-    inputRange: [0, 1],
-    outputRange: [1, 0.9],
-  });
-
   const searchOpacity = searchAnimation.interpolate({
     inputRange: [0, 1],
     outputRange: [0, 1],
   });
 
-  const searchScale = searchAnimation.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0.9, 1],
-  });
-
-  const searchTranslateX = searchAnimation.interpolate({
-    inputRange: [0, 1],
-    outputRange: [50, 0],
-  });
-
   return (
     <View style={styles.container}>
       <Animated.View
-        style={[
-          styles.headerContainer,
-          {
-            opacity: headerOpacity,
-            transform: [{ scale: headerScale }],
-            position: "absolute",
-            width: "100%",
-          },
-        ]}
+        style={[styles.headerContainer, { opacity: headerOpacity }]}
       >
-        <IconButton
-          icon="magnify"
-          size={24}
-          iconColor={textColor}
-          onPress={onSearchPress}
-        />
         <ThemedText style={styles.title}>{title}</ThemedText>
-        <View style={styles.rightContainer}>{rightIcon}</View>
+        <View style={styles.iconContainer}>
+          {!hideSearchIcon && (
+            <IconButton
+              icon="magnify"
+              iconColor={textColor}
+              onPress={onSearchPress}
+            />
+          )}
+          {rightIcon}
+        </View>
       </Animated.View>
 
       <Animated.View
@@ -107,17 +84,12 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
           styles.searchContainer,
           {
             opacity: searchOpacity,
-            transform: [
-              { scale: searchScale },
-              { translateX: searchTranslateX },
-            ],
             backgroundColor: surfaceColor,
           },
         ]}
       >
         <IconButton
           icon="arrow-left"
-          size={24}
           iconColor={textColor}
           onPress={() => {
             onSearchClose();
@@ -127,7 +99,7 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
         <TextInput
           ref={inputRef}
           style={[styles.searchInput, { color: textColor }]}
-          placeholder="Search chats..."
+          placeholder={placeholder}
           placeholderTextColor={textColor + "80"}
           value={searchQuery}
           onChangeText={onSearchChange}
@@ -135,7 +107,6 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
         {searchQuery ? (
           <IconButton
             icon="close"
-            size={20}
             iconColor={textColor}
             onPress={() => onSearchChange("")}
           />
@@ -148,39 +119,34 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
 const styles = StyleSheet.create({
   container: {
     height: 56,
-    justifyContent: "center",
-    paddingHorizontal: distances.sm,
   },
   headerContainer: {
+    height: 56,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    position: "relative",
-  },
-  rightContainer: {
-    width: 48, // Match the width of the search icon
-    alignItems: "flex-end",
+    paddingLeft: distances.md,
   },
   title: {
     fontSize: 20,
     fontFamily: typography.primary.bold,
-    position: "absolute",
-    left: 0,
-    right: 0,
-    textAlign: "center",
-    zIndex: -1,
+  },
+  iconContainer: {
+    flexDirection: "row",
   },
   searchContainer: {
-    height: 40,
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 56,
     flexDirection: "row",
     alignItems: "center",
-    borderRadius: 8,
   },
   searchInput: {
     flex: 1,
     height: "100%",
     fontSize: 16,
     fontFamily: typography.primary.regular,
-    paddingHorizontal: distances.xs,
   },
 });

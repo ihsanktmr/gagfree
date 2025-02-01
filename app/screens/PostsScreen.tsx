@@ -1,10 +1,13 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
 import { useNavigation } from "@react-navigation/native";
+import { distances } from "app/aesthetic/distances";
 import { mapCustomStyle, mapCustomStyleDark } from "app/appInfo";
 import { FABButton } from "app/components/buttons/FABButton";
 import { MapViewComponent } from "app/components/common/GFMapView";
+import { SearchHeader } from "app/components/common/SearchHeader";
 import { ThemedView } from "app/components/containers/ThemedView";
+import PostList from "app/components/lists/post/PostList";
 import { InternetModal } from "app/components/modals/InternetModal";
 import { SwiperTutorialModal } from "app/components/modals/SwiperAddModal";
 import { ItemDetailsStep } from "app/components/postComponents/ItemDetailsStep";
@@ -17,6 +20,7 @@ import { selectTheme } from "app/redux/theme/selectors";
 import { isConnected, setupConnectivityListener } from "app/utils/netCheck";
 import { Alert, StyleSheet } from "react-native";
 import MapView, { Region } from "react-native-maps";
+import { IconButton } from "react-native-paper";
 import { useSelector } from "react-redux";
 
 export function PostsScreen() {
@@ -50,6 +54,8 @@ export function PostsScreen() {
   const [internetModalVisible, setInternetModalVisible] = useState(false);
   const [addProductModalVisible, setAddProductModalVisible] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [showSearch, setShowSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const mapViewRef = useRef<MapView | null>(null);
   const swiperRef = useRef<any>(null);
@@ -124,6 +130,28 @@ export function PostsScreen() {
       onStepComplete: () => submitProduct(),
     },
   ];
+
+  // Filter posts based on search query
+  const filteredPosts = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return posts;
+    }
+
+    const searchTerms = searchQuery.toLowerCase().trim().split(" ");
+
+    return posts.filter((post) => {
+      const searchableText = [post.title, post.description, post.category]
+        .join(" ")
+        .toLowerCase();
+
+      return searchTerms.every((term) => searchableText.includes(term));
+    });
+  }, [posts, searchQuery]);
+
+  const handleSearchChange = (query: string) => {
+    setSearchQuery(query);
+  };
+
   // Effects
   useEffect(() => {
     const unsubscribe = setupConnectivityListener((connected) => {
@@ -159,6 +187,17 @@ export function PostsScreen() {
   const handlePress = (postId: string) => navigate("PostDetail", { postId });
 
   const handleFABPress = () => setAddProductModalVisible(true);
+
+  const handleSearchPress = () => {
+    if (view === "list") {
+      setShowSearch(true);
+    }
+  };
+
+  const handleSearchClose = () => {
+    setShowSearch(false);
+    setSearchQuery("");
+  };
 
   const validateBasicInfo = () => {
     if (!itemDetails.title.trim()) {
@@ -373,17 +412,44 @@ export function PostsScreen() {
 
   return (
     <ThemedView style={styles.mainContainer}>
-      <MapViewComponent
-        posts={posts}
-        region={region}
-        setRegion={setRegion}
-        initialRegion={initialRegion}
-        theme={{ currentTheme: theme, mainColor, iconColor, backgroundColor }}
-        mapCustomStyle={mapCustomStyle}
-        mapCustomStyleDark={mapCustomStyleDark}
-        onMarkerPress={handleMarkerPress}
-        onCalloutPress={handlePress}
+      <SearchHeader
+        title="Posts"
+        showSearch={showSearch}
+        onSearchPress={handleSearchPress}
+        onSearchClose={handleSearchClose}
+        searchQuery={searchQuery}
+        onSearchChange={handleSearchChange}
+        hideSearchIcon={view === "map"}
+        placeholder="Search by title, description..."
+        rightIcon={
+          <IconButton
+            icon={isViewMap ? "view-list" : "map"}
+            iconColor={iconColor}
+            onPress={() => {
+              setView(isViewMap ? "list" : "map");
+              if (showSearch) {
+                handleSearchClose();
+              }
+            }}
+          />
+        }
       />
+
+      {isViewMap ? (
+        <MapViewComponent
+          posts={filteredPosts}
+          region={region}
+          setRegion={setRegion}
+          initialRegion={initialRegion}
+          theme={{ currentTheme: theme, mainColor, iconColor, backgroundColor }}
+          mapCustomStyle={mapCustomStyle}
+          mapCustomStyleDark={mapCustomStyleDark}
+          onMarkerPress={handleMarkerPress}
+          onCalloutPress={handlePress}
+        />
+      ) : (
+        <PostList postData={filteredPosts} />
+      )}
 
       <FABButton onPress={handleFABPress} icon="plus" />
 
@@ -410,10 +476,6 @@ export function PostsScreen() {
 const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  bodyText: {
-    // Add appropriate styles for the body text
+    paddingTop: distances.md,
   },
 });
