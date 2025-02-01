@@ -5,6 +5,7 @@ import { typography } from "app/aesthetic/typography";
 import { useThemeColor } from "app/hooks/useThemeColor";
 import {
   Animated,
+  Platform,
   StyleSheet,
   TextInput,
   TouchableOpacity,
@@ -39,65 +40,107 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
   const inputRef = useRef<TextInput>(null);
 
   useEffect(() => {
-    Animated.timing(searchAnimation, {
+    Animated.spring(searchAnimation, {
       toValue: showSearch ? 1 : 0,
-      duration: 200,
       useNativeDriver: true,
+      speed: 20,
+      bounciness: 4,
     }).start();
 
     if (showSearch) {
-      inputRef.current?.focus();
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100);
     }
   }, [showSearch]);
 
+  const headerOpacity = searchAnimation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [1, 0],
+  });
+
+  const headerScale = searchAnimation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [1, 0.9],
+  });
+
+  const searchOpacity = searchAnimation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, 1],
+  });
+
+  const searchScale = searchAnimation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.9, 1],
+  });
+
+  const searchTranslateX = searchAnimation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [50, 0],
+  });
+
   return (
     <View style={styles.container}>
-      {!showSearch && (
-        <View style={styles.headerContainer}>
-          <ThemedText style={styles.title}>{title}</ThemedText>
-          <View style={styles.rightContainer}>
-            <IconButton
-              icon="magnify"
-              size={24}
-              iconColor={textColor}
-              onPress={onSearchPress}
-            />
-            {rightIcon}
-          </View>
-        </View>
-      )}
+      <Animated.View
+        style={[
+          styles.headerContainer,
+          {
+            opacity: headerOpacity,
+            transform: [{ scale: headerScale }],
+            position: "absolute",
+            width: "100%",
+          },
+        ]}
+      >
+        <IconButton
+          icon="magnify"
+          size={24}
+          iconColor={textColor}
+          onPress={onSearchPress}
+        />
+        <ThemedText style={styles.title}>{title}</ThemedText>
+        <View style={styles.rightContainer}>{rightIcon}</View>
+      </Animated.View>
 
-      {showSearch && (
-        <View
-          style={[styles.searchContainer, { backgroundColor: surfaceColor }]}
-        >
+      <Animated.View
+        style={[
+          styles.searchContainer,
+          {
+            opacity: searchOpacity,
+            transform: [
+              { scale: searchScale },
+              { translateX: searchTranslateX },
+            ],
+            backgroundColor: surfaceColor,
+          },
+        ]}
+      >
+        <IconButton
+          icon="arrow-left"
+          size={24}
+          iconColor={textColor}
+          onPress={() => {
+            onSearchClose();
+            onSearchChange("");
+          }}
+        />
+        <TextInput
+          ref={inputRef}
+          style={[styles.searchInput, { color: textColor }]}
+          placeholder="Search chats..."
+          placeholderTextColor={textColor + "80"}
+          value={searchQuery}
+          onChangeText={onSearchChange}
+        />
+        {searchQuery ? (
           <IconButton
-            icon="arrow-left"
-            size={24}
+            icon="close"
+            size={20}
             iconColor={textColor}
-            onPress={() => {
-              onSearchClose();
-              onSearchChange("");
-            }}
+            onPress={() => onSearchChange("")}
           />
-          <TextInput
-            ref={inputRef}
-            style={[styles.searchInput, { color: textColor }]}
-            placeholder="Search chats..."
-            placeholderTextColor={textColor + "80"}
-            value={searchQuery}
-            onChangeText={onSearchChange}
-          />
-          {searchQuery ? (
-            <IconButton
-              icon="close"
-              size={20}
-              iconColor={textColor}
-              onPress={() => onSearchChange("")}
-            />
-          ) : null}
-        </View>
-      )}
+        ) : null}
+      </Animated.View>
     </View>
   );
 };
@@ -112,15 +155,20 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    position: "relative",
   },
   rightContainer: {
-    flexDirection: "row",
-    alignItems: "center",
+    width: 48, // Match the width of the search icon
+    alignItems: "flex-end",
   },
   title: {
     fontSize: 20,
     fontFamily: typography.primary.bold,
-    flex: 1,
+    position: "absolute",
+    left: 0,
+    right: 0,
+    textAlign: "center",
+    zIndex: -1,
   },
   searchContainer: {
     height: 40,
