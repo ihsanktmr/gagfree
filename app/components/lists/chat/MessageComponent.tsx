@@ -5,24 +5,60 @@ import { borderRadii } from "app/aesthetic/styleConstants";
 import { typography } from "app/aesthetic/typography";
 import { ThemedText } from "app/components/texts/ThemedText";
 import { useThemeColor } from "app/hooks/useThemeColor";
-import { StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
+import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
 interface Message {
   id: string;
   text: string;
   timestamp: string;
-  sender: "user" | "other"; // Indicates if the message is sent by the user or someone else
+  sender: "user" | "other";
+  status?: "sent" | "delivered" | "read"; // Add message status
+  isFirstInGroup?: boolean; // Add grouping support
+  isLastInGroup?: boolean;
 }
 
 interface MessageComponentProps {
   message: Message;
+  onLongPress?: (message: Message) => void;
 }
 
-const MessageComponent: React.FC<MessageComponentProps> = ({ message }) => {
+const MessageComponent: React.FC<MessageComponentProps> = ({
+  message,
+  onLongPress,
+}) => {
+  const mainColor = useThemeColor("main");
   const backgroundColor = useThemeColor(
-    message.sender === "user" ? "text" : "blue",
+    message.sender === "user" ? "main" : "icon",
   );
-  const textColor = useThemeColor(message.sender === "user" ? "blue" : "text");
+  const textColor =
+    message.sender === "user" ? "#FFFFFF" : useThemeColor("text");
+
+  const renderMessageStatus = () => {
+    if (message.sender !== "user") return null;
+
+    const getStatusIcon = () => {
+      switch (message.status) {
+        case "sent":
+          return "check";
+        case "delivered":
+          return "check-all";
+        case "read":
+          return "check-all";
+        default:
+          return "clock-outline";
+      }
+    };
+
+    return (
+      <Icon
+        name={getStatusIcon()}
+        size={14}
+        color={message.status === "read" ? mainColor : "rgba(255,255,255,0.7)"}
+        style={styles.statusIcon}
+      />
+    );
+  };
 
   return (
     <View
@@ -31,44 +67,98 @@ const MessageComponent: React.FC<MessageComponentProps> = ({ message }) => {
         message.sender === "user" ? styles.userMessage : styles.otherMessage,
       ]}
     >
-      <ThemedText
-        style={[styles.messageText, { backgroundColor, color: textColor }]}
+      <Pressable
+        onLongPress={() => onLongPress?.(message)}
+        style={({ pressed }) => [
+          styles.messageBubble,
+          {
+            backgroundColor,
+            opacity: pressed ? 0.9 : 1,
+            borderTopLeftRadius:
+              message.sender === "other" && !message.isFirstInGroup
+                ? borderRadii.small
+                : borderRadii.large,
+            borderTopRightRadius:
+              message.sender === "user" && !message.isFirstInGroup
+                ? borderRadii.small
+                : borderRadii.large,
+            borderBottomLeftRadius:
+              message.sender === "other" && !message.isLastInGroup
+                ? borderRadii.small
+                : borderRadii.large,
+            borderBottomRightRadius:
+              message.sender === "user" && !message.isLastInGroup
+                ? borderRadii.small
+                : borderRadii.large,
+          },
+        ]}
       >
-        {message.text}
-      </ThemedText>
-      <ThemedText style={styles.timestamp}>
-        {new Date(message.timestamp).toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        })}
-      </ThemedText>
+        <ThemedText style={[styles.messageText, { color: textColor }]}>
+          {message.text}
+        </ThemedText>
+        <View style={styles.messageFooter}>
+          <ThemedText
+            style={[
+              styles.timestamp,
+              {
+                color:
+                  message.sender === "user"
+                    ? "rgba(255,255,255,0.7)"
+                    : "rgba(0,0,0,0.5)",
+              },
+            ]}
+          >
+            {new Date(message.timestamp).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+          </ThemedText>
+          {renderMessageStatus()}
+        </View>
+      </Pressable>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   messageContainer: {
-    marginVertical: distances.xs,
+    marginVertical: distances.xxs,
+    maxWidth: "80%",
   },
   userMessage: {
     alignSelf: "flex-end",
+    marginLeft: "20%",
   },
   otherMessage: {
     alignSelf: "flex-start",
+    marginRight: "20%",
+  },
+  messageBubble: {
+    padding: distances.sm,
+    elevation: 1,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 1,
   },
   messageText: {
-    paddingHorizontal: distances.sm,
-    paddingVertical: distances.xs,
-    borderRadius: borderRadii.medium,
     fontFamily: typography.primary.regular,
-    fontSize: 14,
-    maxWidth: "80%",
+    fontSize: 15,
+    lineHeight: 20,
+  },
+  messageFooter: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    marginTop: 4,
   },
   timestamp: {
-    fontSize: 10,
+    fontSize: 11,
     fontFamily: typography.secondary.regular,
-    marginTop: distances.xxs,
-    alignSelf: "flex-end",
+    marginRight: 4,
+  },
+  statusIcon: {
+    marginLeft: 2,
   },
 });
 
