@@ -1,15 +1,26 @@
 import { createReducer } from "@reduxjs/toolkit";
+import { MOCK_POSTS } from "app/data/mockPosts";
 
-import { addBookmark, removeBookmark, setPosts } from "./actions";
+import {
+  addBookmark,
+  initializePosts,
+  removeBookmark,
+  setPosts,
+} from "./actions";
 import { PostsState } from "./types";
 
 const initialState: PostsState = {
-  posts: [],
+  posts: __DEV__ ? MOCK_POSTS : [], // Use mock data in dev
   bookmarkedPosts: [],
 };
 
 const postsReducer = createReducer(initialState, (builder) => {
   builder
+    .addCase(initializePosts, (state) => {
+      if (__DEV__ && state.posts.length === 0) {
+        state.posts = MOCK_POSTS;
+      }
+    })
     .addCase(setPosts, (state, action) => {
       state.posts = action.payload;
     })

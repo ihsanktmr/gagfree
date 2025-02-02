@@ -4,12 +4,12 @@ import { distances } from "app/aesthetic/distances";
 import { AddPostModal } from "app/components/postComponents/AddPostModal";
 import { PostsContent } from "app/components/postComponents/PostsContent";
 import { PostsHeader } from "app/components/postComponents/PostsHeader";
+import { MOCK_POSTS } from "app/data/mockPosts";
 import { usePostForm } from "app/hooks/usePostForm";
 import { usePostsData } from "app/hooks/usePostsData";
 import { useThemeColor } from "app/hooks/useThemeColor";
-import { setPosts } from "app/redux/post/actions";
+import { initializePosts, setPosts } from "app/redux/post/actions";
 import { selectTheme } from "app/redux/theme/selectors";
-import { MOCK_POSTS } from "app/services/mockData";
 import { StyleSheet, View } from "react-native";
 import { Region } from "react-native-maps";
 import { useDispatch, useSelector } from "react-redux";
@@ -29,7 +29,13 @@ export const PostsScreen: React.FC<PostsScreenProps> = ({ initialRegion }) => {
 
   // Load mock data when component mounts
   useEffect(() => {
-    dispatch(setPosts(MOCK_POSTS));
+    dispatch(initializePosts());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (__DEV__) {
+      dispatch(setPosts(MOCK_POSTS));
+    }
   }, [dispatch]);
 
   const {

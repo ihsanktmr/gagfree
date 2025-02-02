@@ -10,9 +10,10 @@ import { ThemedView } from "app/components/containers/ThemedView";
 import { ThemedText } from "app/components/texts/ThemedText";
 import { useThemeColor } from "app/hooks/useThemeColor";
 import { i18n } from "app/language";
+import { persistor } from "app/redux";
 import { selectTheme } from "app/redux/theme/selectors";
 import { shareApp } from "app/utils/share";
-import { Linking, ScrollView, StyleSheet } from "react-native";
+import { Alert, Linking, ScrollView, StyleSheet } from "react-native";
 import { useSelector } from "react-redux";
 
 export function SettingsScreen() {
@@ -57,6 +58,11 @@ export function SettingsScreen() {
 
   const handleNotifications = () => {
     navigation.navigate("NotificationsScreen");
+  };
+
+  const handleResetStore = async () => {
+    await persistor.purge();
+    Alert.alert("Dev", "Store has been purged");
   };
 
   return (
@@ -123,6 +129,13 @@ export function SettingsScreen() {
             <Ionicons name="shield-checkmark" size={24} color={iconColor} />
           }
         />
+        {__DEV__ && (
+          <SettingButton
+            onPress={handleResetStore}
+            name="Purge Store (Dev)"
+            icon={<Ionicons name="restore" size={24} color="red" />}
+          />
+        )}
       </ThemedView>
     </ScrollView>
   );

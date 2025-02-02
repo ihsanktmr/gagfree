@@ -1,11 +1,7 @@
 import React, { useState } from "react";
 
 import { Entypo, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import {
-  RouteProp,
-  useNavigation,
-  useRoute,
-} from "@react-navigation/native";
+import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { distances } from "app/aesthetic/distances";
 import { scrollViewBottomGap } from "app/aesthetic/styleConstants";
@@ -13,7 +9,7 @@ import { typography } from "app/aesthetic/typography";
 import { Header } from "app/components/common/Header";
 import { ThemedView } from "app/components/containers/ThemedView";
 import { ThemedText } from "app/components/texts/ThemedText";
-import { useData } from "app/hooks/useData";
+import { usePostsData } from "app/hooks/usePostsData";
 import { useThemeColor } from "app/hooks/useThemeColor";
 import { i18n } from "app/language";
 import { RootStackParamList } from "app/navigation/types";
@@ -58,7 +54,7 @@ const PostDetailScreen = () => {
   const navigation = useNavigation<PostDetailNavigationProp>();
   const route = useRoute<PostDetailRouteProp>();
   const { postId, post: passedPost } = route.params as RouteParams;
-  const posts = useData();
+  const { posts } = usePostsData();
   const dispatch = useDispatch();
   const { showSnackbar } = useSnackbar();
   const bookmarkedPosts = useSelector(selectBookmarkedPosts);
