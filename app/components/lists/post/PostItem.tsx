@@ -1,16 +1,13 @@
 import React, { useCallback } from "react";
 
-import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import { CommonActions } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { distances } from "app/aesthetic/distances";
 import { borderRadii } from "app/aesthetic/styleConstants";
 import { typography } from "app/aesthetic/typography";
+import { Icon, IoniconsName } from "app/components/common/Icon";
 import { ThemedText } from "app/components/texts/ThemedText";
 import { useThemeColor } from "app/hooks/useThemeColor";
 import { i18n } from "app/language";
-import { RootStackParamList } from "app/navigation/types";
 import { addBookmark, removeBookmark } from "app/redux/post/actions";
 import { selectBookmarkedPosts } from "app/redux/post/selectors";
 import { Post } from "app/redux/post/types";
@@ -44,11 +41,9 @@ const PostItem: React.FC<PostItemProps> = ({ item, onPress }) => {
 
   const iconColor = useThemeColor("icon");
   const textColor = useThemeColor("text");
-  const backgroundColor = useThemeColor("background");
   const surfaceColor = useThemeColor("surface");
   const mainColor = useThemeColor("main");
   const blueColor = useThemeColor("blue");
-  const tintColor = useThemeColor("tint");
   const dispatch = useDispatch();
   const bookmarkedPosts = useSelector(selectBookmarkedPosts);
   const isBookmarked = bookmarkedPosts.some((post) => post._id === item._id);
@@ -142,7 +137,7 @@ const PostItem: React.FC<PostItemProps> = ({ item, onPress }) => {
     : "";
 
   const renderActionButton = (
-    iconName: string,
+    iconName: IoniconsName,
     onPress: () => void,
     color: string,
   ) => (
@@ -151,7 +146,7 @@ const PostItem: React.FC<PostItemProps> = ({ item, onPress }) => {
       style={styles.actionButton}
       hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
     >
-      <Ionicons name={iconName} size={20} color={color} />
+      <Icon type="ionicon" name={iconName} size={20} color={color} />
     </TouchableOpacity>
   );
 
@@ -190,7 +185,12 @@ const PostItem: React.FC<PostItemProps> = ({ item, onPress }) => {
                   { backgroundColor: iconColor },
                 ]}
               >
-                <Ionicons name="image-outline" size={24} color={surfaceColor} />
+                <Icon
+                  type="ionicon"
+                  name="image-outline"
+                  size={24}
+                  color={surfaceColor}
+                />
               </View>
             )}
           </View>
@@ -218,7 +218,7 @@ const PostItem: React.FC<PostItemProps> = ({ item, onPress }) => {
                 blueColor,
               )}
               {renderActionButton(
-                isBookmarked ? "bookmark" : "bookmark-outline",
+                isBookmarked ? "heart" : "heart-outline",
                 handleBookmarkToggle,
                 isBookmarked ? mainColor : iconColor,
               )}
@@ -238,7 +238,8 @@ const PostItem: React.FC<PostItemProps> = ({ item, onPress }) => {
               {item.contact?.fullAddress && (
                 <View style={styles.locationContainer}>
                   <View style={styles.locationIconContainer}>
-                    <Ionicons
+                    <Icon
+                      type="ionicon"
                       name="location-outline"
                       size={16}
                       color={blueColor}
@@ -386,8 +387,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   actionButton: {
-    padding: distances.xxs,
-    marginLeft: distances.xs,
+    padding: distances.xs,
+    marginLeft: distances.sm,
   },
 });
 

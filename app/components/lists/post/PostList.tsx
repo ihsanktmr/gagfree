@@ -54,6 +54,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     padding: distances.md,
+    paddingBottom: distances.lg * 7,
   },
 });
 

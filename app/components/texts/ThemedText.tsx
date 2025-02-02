@@ -36,7 +36,6 @@ const styles = StyleSheet.create({
   default: {
     fontSize: 16,
     fontFamily: typography.primary.regular,
-    marginBottom: 16,
   },
   defaultSemiBold: {
     fontSize: 16,
