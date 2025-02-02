@@ -21,9 +21,15 @@ export interface Contact {
 export interface Post {
   _id: string; // Unique identifier for the post
   title: string; // Title of the post
-  contact: Contact; // Contact details
   description: string; // Description of the post
-  images: Image[]; // List of images associated with the post
+  userId: string; // Add this field
+  images?: Array<{ imageUrl: string }>;
+  contact: {
+    phoneNumber?: string;
+    fullAddress?: string;
+  };
+  category?: string;
+  createdAt?: string;
   postType: PostType; // Type of the post
 }
 

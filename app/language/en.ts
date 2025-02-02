@@ -19,6 +19,7 @@ const en = {
   next: "Next",
   skip: "Skip",
   save: "Save",
+  saved: "Saved",
   share: "Share",
   okay: "Okay",
   bookmarks: "Bookmarks",
@@ -62,6 +63,11 @@ const en = {
   noInternet:
     "It appears that an internet connection is currently unavailable. The application remains functional; however, certain features, such as images and maps, may not function as intended.",
   retry: "Retry",
+  reportPostTitle: "Report Post",
+  reportPostMessage: "Are you sure you want to report this post?",
+  report: "Report",
+  reportSent: "Thank you for your report",
+  errorOpeningMaps: "Could not open maps",
 };
 
 export default en;
