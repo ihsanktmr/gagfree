@@ -1,8 +1,10 @@
 import React from "react";
 
 import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { mapCustomStyle, mapCustomStyleDark } from "app/appInfo";
 import { useThemeColor } from "app/hooks/useThemeColor";
+import { RootStackParamList } from "app/navigation/types";
 import { Post } from "app/redux/post/types";
 import { StyleSheet, View } from "react-native";
 import { Region } from "react-native-maps";
@@ -10,6 +12,8 @@ import { Region } from "react-native-maps";
 import { FABButton } from "../buttons/FABButton";
 import { MapViewComponent } from "../common/GFMapView";
 import PostList from "../lists/post/PostList";
+
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 interface PostsContentProps {
   view: "map" | "list";
@@ -26,7 +30,7 @@ export const PostsContent: React.FC<PostsContentProps> = ({
   theme,
   onAddPress,
 }) => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProp>();
   const mainColor = useThemeColor("main");
   const iconColor = useThemeColor("icon");
   const backgroundColor = useThemeColor("background");
@@ -35,29 +39,11 @@ export const PostsContent: React.FC<PostsContentProps> = ({
 
   const handlePostPress = (postId: string) => {
     const selectedPost = posts.find((p) => p._id === postId);
-
-    console.log("Navigation details:", {
-      postId,
-      foundPost: selectedPost
-        ? {
-            id: selectedPost._id,
-            title: selectedPost.title,
-            category: selectedPost.category,
-          }
-        : "not found",
-      availablePosts: posts.map((p) => ({
-        id: p._id,
-        title: p.title,
-      })),
-    });
-
     if (selectedPost) {
       navigation.navigate("PostDetail", {
         postId: selectedPost._id,
         post: selectedPost,
       });
-    } else {
-      console.warn("Post not found:", postId);
     }
   };
 
@@ -87,7 +73,7 @@ export const PostsContent: React.FC<PostsContentProps> = ({
           mapCustomStyle={mapCustomStyle}
           mapCustomStyleDark={mapCustomStyleDark}
           onMarkerPress={handleMarkerPress}
-          onCalloutPress={(post) => handlePostPress(post._id)}
+          onCalloutPress={handlePostPress}
         />
       ) : (
         <PostList postData={posts} onPostPress={handlePostPress} />
