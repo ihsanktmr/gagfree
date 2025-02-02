@@ -1,7 +1,7 @@
 import React from "react";
 
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { distances } from "app/aesthetic/distances";
 import { borderRadii, dividerHeight } from "app/aesthetic/styleConstants";
 import { typography } from "app/aesthetic/typography";
@@ -19,17 +19,21 @@ const postCoverImageSize = 200;
 
 const PostItem: React.FC<PostItemProps> = ({ item }) => {
   const iconColor = useThemeColor("icon");
-  const { navigate } = useNavigation();
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
   const handlePress = () => {
-    navigate("PostDetail", { postId: item.id });
+    navigation.navigate("PostDetail", { postId: item._id });
   };
 
   const mainImage =
     item.images && item.images.length > 0 ? item.images[0] : null;
 
   return (
-    <TouchableOpacity onPress={handlePress} style={styles.postListItem}>
+    <TouchableOpacity
+      onPress={handlePress}
+      style={styles.postListItem}
+      activeOpacity={0.7}
+    >
       <ThemedView style={styles.postListItemInner}>
         <ThemedView style={{ flexDirection: "row" }}>
           <Image

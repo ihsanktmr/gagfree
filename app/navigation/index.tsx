@@ -11,7 +11,6 @@ import { BookmarksScreen } from "app/screens/BookmarksScreen";
 import ChatDetailScreen from "app/screens/ChatDetailScreen";
 import { ChatsScreen } from "app/screens/ChatsScreen";
 import { NotificationsScreen } from "app/screens/NotificationsScreen";
-// Import screens
 import { OnboardingScreen } from "app/screens/OnboardingScreen";
 import PostDetailScreen from "app/screens/PostDetailScreen";
 import { PostsScreen } from "app/screens/PostsScreen";
@@ -19,37 +18,25 @@ import { SettingsScreen } from "app/screens/SettingsScreen";
 import { Appearance } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 
-// Create the stack and bottom tab navigators
-const Stack = createNativeStackNavigator();
-const Tabs = createBottomTabNavigator();
+import { MainTabParamList, RootStackParamList } from "./types";
 
-// Bottom tab navigator with Map and Settings screens
-export function MainTab() {
+const Stack = createNativeStackNavigator<RootStackParamList>();
+const Tab = createBottomTabNavigator<MainTabParamList>();
+
+function MainTab() {
   return (
-    <Tabs.Navigator
+    <Tab.Navigator
       initialRouteName="Posts"
       tabBar={(props) => <MainTabBar {...props} />}
+      screenOptions={{ headerShown: false }}
     >
-      <Tabs.Screen
-        name="Posts"
-        options={{ headerShown: false }}
-        component={PostsScreen}
-      />
-      <Tabs.Screen
-        name="Chats"
-        options={{ headerShown: false }}
-        component={ChatsScreen}
-      />
-      <Tabs.Screen
-        name="Settings"
-        options={{ headerShown: false }}
-        component={SettingsScreen}
-      />
-    </Tabs.Navigator>
+      <Tab.Screen name="Posts" component={PostsScreen} />
+      <Tab.Screen name="Chats" component={ChatsScreen} />
+      <Tab.Screen name="Settings" component={SettingsScreen} />
+    </Tab.Navigator>
   );
 }
 
-// Root stack navigator with Onboarding flow and Bottom Tab navigation
 function RootStack() {
   const dispatch = useDispatch();
   const hasSeenOnboarding = useSelector(selectIsOnboardingSeen);
@@ -68,46 +55,17 @@ function RootStack() {
   return (
     <Stack.Navigator
       initialRouteName={hasSeenOnboarding ? "Main" : "Onboarding"}
+      screenOptions={{ headerShown: false }}
     >
-      <Stack.Screen
-        name="Main"
-        component={MainTab}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="Onboarding"
-        component={OnboardingScreen}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="Posts"
-        component={PostsScreen}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="PostDetail"
-        component={PostDetailScreen}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="ChatDetail"
-        component={ChatDetailScreen}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="ArchivedChats"
-        component={ArchivedChatsScreen}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="BookmarksScreen"
-        component={BookmarksScreen}
-        options={{ headerShown: false }}
-      />
+      <Stack.Screen name="Main" component={MainTab} />
+      <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+      <Stack.Screen name="PostDetail" component={PostDetailScreen} />
+      <Stack.Screen name="ChatDetail" component={ChatDetailScreen} />
+      <Stack.Screen name="ArchivedChats" component={ArchivedChatsScreen} />
+      <Stack.Screen name="BookmarksScreen" component={BookmarksScreen} />
       <Stack.Screen
         name="NotificationsScreen"
         component={NotificationsScreen}
-        options={{ headerShown: false }}
       />
     </Stack.Navigator>
   );
