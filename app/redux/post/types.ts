@@ -8,13 +8,13 @@ export interface Image {
   imageUrl: string; // URL of the image
 }
 
-// Represents the contact details of the giver
+// Separate interfaces for better type safety
 export interface Contact {
-  phoneNumber: string; // Phone number
-  name: string; // Name of the contact person
-  fullAddress: string; // Full address as a single string
-  latitude: number; // Latitude of the location
-  longitude: number; // Longitude of the location
+  phoneNumber?: string;
+  name?: string;
+  fullAddress?: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 // Represents a single post for giving away items
@@ -24,10 +24,7 @@ export interface Post {
   description: string; // Description of the post
   userId: string; // Add this field
   images?: Array<{ imageUrl: string }>;
-  contact: {
-    phoneNumber?: string;
-    fullAddress?: string;
-  };
+  contact: Contact; // Use the Contact interface
   category?: string;
   createdAt?: string;
   postType: PostType; // Type of the post

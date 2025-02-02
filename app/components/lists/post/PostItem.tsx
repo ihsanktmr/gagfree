@@ -1,119 +1,394 @@
-import React from "react";
+import React, { useCallback } from "react";
 
 import { Ionicons } from "@expo/vector-icons";
-import { NavigationProp, useNavigation } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
+import { CommonActions } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { distances } from "app/aesthetic/distances";
-import { borderRadii, dividerHeight } from "app/aesthetic/styleConstants";
+import { borderRadii } from "app/aesthetic/styleConstants";
 import { typography } from "app/aesthetic/typography";
-import { ThemedView } from "app/components/containers/ThemedView";
 import { ThemedText } from "app/components/texts/ThemedText";
 import { useThemeColor } from "app/hooks/useThemeColor";
+import { i18n } from "app/language";
+import { RootStackParamList } from "app/navigation/types";
+import { addBookmark, removeBookmark } from "app/redux/post/actions";
+import { selectBookmarkedPosts } from "app/redux/post/selectors";
 import { Post } from "app/redux/post/types";
-import { Image, StyleSheet, TouchableOpacity } from "react-native";
+import { format } from "date-fns";
+import * as Haptics from "expo-haptics";
+import {
+  Alert,
+  Animated,
+  Dimensions,
+  Image,
+  Share,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { useDispatch, useSelector } from "react-redux";
+
+const SCREEN_WIDTH = Dimensions.get("window").width;
+const CARD_MARGIN = distances.md * 2; // Left and right margins combined
+const IMAGE_SIZE = 110;
+const CONTENT_PADDING = distances.sm * 2; // Left and right padding combined
+const CONTENT_WIDTH = SCREEN_WIDTH - CARD_MARGIN - IMAGE_SIZE - CONTENT_PADDING;
 
 interface PostItemProps {
   item: Post;
+  onPress: () => void;
 }
 
-const postCoverImageSize = 200;
+const PostItem: React.FC<PostItemProps> = ({ item, onPress }) => {
+  const navigation = useNavigation();
 
-const PostItem: React.FC<PostItemProps> = ({ item }) => {
   const iconColor = useThemeColor("icon");
-  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const textColor = useThemeColor("text");
+  const backgroundColor = useThemeColor("background");
+  const surfaceColor = useThemeColor("surface");
+  const mainColor = useThemeColor("main");
+  const blueColor = useThemeColor("blue");
+  const tintColor = useThemeColor("tint");
+  const dispatch = useDispatch();
+  const bookmarkedPosts = useSelector(selectBookmarkedPosts);
+  const isBookmarked = bookmarkedPosts.some((post) => post._id === item._id);
 
-  const handlePress = () => {
-    navigation.navigate("PostDetail", { postId: item._id });
-  };
+  // Animation value
+  const scaleAnim = React.useRef(new Animated.Value(1)).current;
 
-  const mainImage =
-    item.images && item.images.length > 0 ? item.images[0] : null;
+  const handlePress = useCallback(() => {
+    Animated.sequence([
+      Animated.timing(scaleAnim, {
+        toValue: 0.95,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleAnim, {
+        toValue: 1,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    onPress();
+  }, [onPress]);
+
+  const handleLongPress = useCallback(async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+    Alert.alert(i18n.t("quickActions"), "", [
+      {
+        text: isBookmarked
+          ? i18n.t("removeFromBookmarks")
+          : i18n.t("addToBookmarks"),
+        onPress: handleBookmarkToggle,
+      },
+      {
+        text: i18n.t("share"),
+        onPress: handleShare,
+      },
+      {
+        text: i18n.t("report"),
+        style: "destructive",
+        onPress: handleReport,
+      },
+      {
+        text: i18n.t("cancel"),
+        style: "cancel",
+      },
+    ]);
+  }, [isBookmarked, item]);
+
+  const handleBookmarkToggle = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    if (isBookmarked) {
+      dispatch(removeBookmark(item._id));
+    } else {
+      dispatch(addBookmark(item));
+    }
+  }, [isBookmarked, item, dispatch]);
+
+  const handleShare = useCallback(async () => {
+    try {
+      await Share.share({
+        message: `${item.title}\n\n${item.description}`,
+        title: item.title,
+      });
+    } catch (error) {
+      console.error("Error sharing:", error);
+    }
+  }, [item]);
+
+  const handleReport = useCallback(() => {
+    Alert.alert(i18n.t("reportPostTitle"), i18n.t("reportPostMessage"), [
+      {
+        text: i18n.t("cancel"),
+        style: "cancel",
+      },
+      {
+        text: i18n.t("report"),
+        style: "destructive",
+        onPress: () => {
+          // Add report logic here
+          console.log("Report post:", item._id);
+        },
+      },
+    ]);
+  }, [item._id]);
+
+  const mainImage = item.images?.[0];
+  const formattedDate = item.createdAt
+    ? format(new Date(item.createdAt), "MMM dd, yyyy")
+    : "";
+
+  const renderActionButton = (
+    iconName: string,
+    onPress: () => void,
+    color: string,
+  ) => (
+    <TouchableOpacity
+      onPress={onPress}
+      style={styles.actionButton}
+      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+    >
+      <Ionicons name={iconName} size={20} color={color} />
+    </TouchableOpacity>
+  );
 
   return (
-    <TouchableOpacity
-      onPress={handlePress}
-      style={styles.postListItem}
-      activeOpacity={0.7}
-    >
-      <ThemedView style={styles.postListItemInner}>
-        <ThemedView style={{ flexDirection: "row" }}>
-          <Image
-            source={{ uri: mainImage || "https://via.placeholder.com/50" }}
-            resizeMode="cover"
-            style={styles.postLogo}
-          />
-          <ThemedView style={styles.calloutTitleContainer}>
-            <ThemedView style={styles.calloutOverviewContainer}>
-              <ThemedText numberOfLines={1} style={styles.calloutTitle}>
-                {item.title}
-              </ThemedText>
-              <ThemedText numberOfLines={1} style={styles.calloutType}>
+    <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+      <TouchableOpacity
+        onPress={handlePress}
+        onLongPress={handleLongPress}
+        style={[styles.container, { backgroundColor: surfaceColor }]}
+        activeOpacity={0.7}
+      >
+        <View style={styles.imageWrapper}>
+          {item.category && (
+            <View
+              style={[
+                styles.categoryBadgeOverlay,
+                { backgroundColor: mainColor },
+              ]}
+            >
+              <ThemedText style={styles.categoryTextOverlay}>
                 {item.category}
               </ThemedText>
-            </ThemedView>
-            <Ionicons name="arrow-forward" size={20} color={iconColor} />
-          </ThemedView>
-        </ThemedView>
+            </View>
+          )}
+          <View style={styles.imageContainer}>
+            {mainImage ? (
+              <Image
+                source={{ uri: mainImage.imageUrl }}
+                style={styles.image}
+                resizeMode="cover"
+              />
+            ) : (
+              <View
+                style={[
+                  styles.placeholderImage,
+                  { backgroundColor: iconColor },
+                ]}
+              >
+                <Ionicons name="image-outline" size={24} color={surfaceColor} />
+              </View>
+            )}
+          </View>
+        </View>
 
-        <ThemedText style={styles.description} numberOfLines={2}>
-          {item.description}
-        </ThemedText>
-      </ThemedView>
-    </TouchableOpacity>
+        <View style={styles.contentContainer}>
+          <View style={styles.headerContainer}>
+            <ThemedText
+              style={[styles.title, { color: textColor }]}
+              numberOfLines={2}
+              ellipsizeMode="tail"
+            >
+              {item.title}
+            </ThemedText>
+            <View style={styles.actionButtons}>
+              {renderActionButton(
+                "chatbubble-outline",
+                () =>
+                  navigation.navigate("ChatDetail", {
+                    chatId: `post_${item._id}`,
+                    postId: item._id,
+                    title: item.title,
+                    otherUserId: item.userId,
+                  }),
+                blueColor,
+              )}
+              {renderActionButton(
+                isBookmarked ? "bookmark" : "bookmark-outline",
+                handleBookmarkToggle,
+                isBookmarked ? mainColor : iconColor,
+              )}
+            </View>
+          </View>
+
+          <ThemedText
+            style={[styles.description, { color: iconColor }]}
+            numberOfLines={3}
+            ellipsizeMode="tail"
+          >
+            {item.description}
+          </ThemedText>
+
+          <View style={styles.footer}>
+            <View style={styles.footerContent}>
+              {item.contact?.fullAddress && (
+                <View style={styles.locationContainer}>
+                  <View style={styles.locationIconContainer}>
+                    <Ionicons
+                      name="location-outline"
+                      size={16}
+                      color={blueColor}
+                    />
+                  </View>
+                  <ThemedText
+                    style={[styles.locationText, { color: iconColor }]}
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                  >
+                    {item.contact.fullAddress}
+                  </ThemedText>
+                </View>
+              )}
+              <ThemedText style={[styles.date, { color: iconColor }]}>
+                {formattedDate}
+              </ThemedText>
+            </View>
+          </View>
+        </View>
+      </TouchableOpacity>
+    </Animated.View>
   );
 };
 
 const styles = StyleSheet.create({
-  postListItem: {
+  container: {
+    flexDirection: "row",
+    marginHorizontal: distances.md,
+    marginVertical: distances.xs,
     borderRadius: borderRadii.medium,
-    marginBottom: distances.md,
-    paddingHorizontal: distances.md,
+    padding: distances.sm,
+    borderWidth: 1,
+    minHeight: IMAGE_SIZE + CONTENT_PADDING,
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
-  postListItemInner: {
-    paddingBottom: distances.md,
-    borderBottomWidth: dividerHeight,
+  imageWrapper: {
+    width: IMAGE_SIZE,
+    height: IMAGE_SIZE,
+    padding: 2, // For border effect
   },
-  calloutType: {
-    fontSize: 12,
-    fontFamily: typography.secondary.semiBold,
-  },
-  calloutTitle: {
-    fontSize: 16,
-    fontFamily: typography.primary.bold,
-    paddingRight: distances.sm,
-  },
-  title: {
-    fontSize: 18,
-    fontFamily: typography.primary.bold,
-    marginBottom: distances.xxs,
-  },
-  description: {
-    fontSize: 14,
-    fontFamily: typography.secondary.regular,
-    marginTop: distances.xs,
-  },
-  postLogo: {
-    width: 50,
-    height: 50,
-    borderRadius: borderRadii.medium,
-    marginRight: distances.sm,
-  },
-  postCoverImage: {
-    width: postCoverImageSize,
-    height: postCoverImageSize,
-    marginRight: distances.sm,
-    borderRadius: borderRadii.medium,
-  },
-  calloutOverviewContainer: {
-    flexDirection: "column",
-  },
-  calloutTitleContainer: {
+  imageContainer: {
     flex: 1,
+    borderRadius: borderRadii.medium,
+    overflow: "hidden",
+  },
+  image: {
+    width: "100%",
+    height: "100%",
+    backgroundColor: "#f0f0f0", // Placeholder color while loading
+  },
+  placeholderImage: {
+    width: "100%",
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+    opacity: 0.5,
+  },
+  contentContainer: {
+    flex: 1,
+    marginLeft: distances.md,
+    width: CONTENT_WIDTH,
+    justifyContent: "space-between",
+  },
+  headerContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: distances.xs,
-    paddingRight: distances.xs,
+    minHeight: 24, // Ensure consistent height
+  },
+  title: {
+    fontSize: 16,
+    fontFamily: typography.primary.medium,
+    flex: 1,
+    marginRight: distances.xs,
+    lineHeight: 20,
+  },
+  categoryBadgeOverlay: {
+    position: "absolute",
+    top: 8,
+    left: 8,
+    paddingHorizontal: distances.xs,
+    paddingVertical: 4,
+    borderRadius: borderRadii.small,
+    zIndex: 1,
+  },
+  categoryTextOverlay: {
+    fontSize: 10,
+    fontFamily: typography.secondary.medium,
+    color: "#FFF",
+  },
+  description: {
+    fontSize: 14,
+    fontFamily: typography.secondary.regular,
+    marginBottom: distances.xs,
+    lineHeight: 18,
+    minHeight: 36,
+  },
+  footer: {
+    marginTop: "auto", // Pushes footer to bottom
+    paddingTop: distances.xs,
+  },
+  footerContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    minHeight: 20,
+  },
+  locationContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+    marginRight: distances.md,
+    maxWidth: "80%", // Prevent overflow into date
+  },
+  locationIconContainer: {
+    width: 16,
+    height: 16,
+    marginRight: 4,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  locationText: {
+    fontSize: 12,
+    fontFamily: typography.secondary.regular,
+    lineHeight: 16, // Match icon height
+    flex: 1,
+  },
+  date: {
+    fontSize: 12,
+    fontFamily: typography.secondary.regular,
+    lineHeight: 16, // Match location text
+    marginLeft: "auto", // Push date to right
+  },
+  actionButtons: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  actionButton: {
+    padding: distances.xxs,
+    marginLeft: distances.xs,
   },
 });
 
-export default PostItem;
+export default React.memo(PostItem);

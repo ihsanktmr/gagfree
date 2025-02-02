@@ -2,7 +2,6 @@ import React, { useState } from "react";
 
 import { Entypo, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import {
-  NavigationProp,
   RouteProp,
   useNavigation,
   useRoute,
@@ -19,9 +18,8 @@ import { useThemeColor } from "app/hooks/useThemeColor";
 import { i18n } from "app/language";
 import { RootStackParamList } from "app/navigation/types";
 import { useSnackbar } from "app/providers/SnackbarProvider";
-import { createChat } from "app/redux/chat/actions";
 import { addBookmark, removeBookmark } from "app/redux/post/actions";
-import { selectBookmarkedPosts } from "app/redux/post/selectors";
+import { selectBookmarkedPosts, selectPosts } from "app/redux/post/selectors";
 import { Post } from "app/redux/post/types";
 import { sharePost } from "app/utils/share";
 import * as Clipboard from "expo-clipboard";
@@ -51,15 +49,21 @@ type PostDetailNavigationProp = NativeStackNavigationProp<
 
 type PostDetailRouteProp = RouteProp<RootStackParamList, "PostDetail">;
 
+interface RouteParams {
+  postId: string;
+  post?: Post;
+}
+
 const PostDetailScreen = () => {
   // Hooks
   const navigation = useNavigation<PostDetailNavigationProp>();
   const route = useRoute<PostDetailRouteProp>();
-  const { postId } = route.params;
+  const { postId, post: passedPost } = route.params as RouteParams;
   const posts = useData();
   const dispatch = useDispatch();
   const { showSnackbar } = useSnackbar();
   const bookmarkedPosts = useSelector(selectBookmarkedPosts);
+  const allPosts = useSelector(selectPosts);
 
   // Theme
   const iconColor = useThemeColor("icon");
@@ -71,8 +75,27 @@ const PostDetailScreen = () => {
   const [menuVisible, setMenuVisible] = useState(false);
 
   // Data
-  const post = posts.find((item) => item._id === postId);
+  const post = passedPost || posts.find((item) => item._id === postId);
   const isBookmarked = bookmarkedPosts.some((item) => item._id === post?._id);
+
+  console.log("PostDetailScreen - Details:", {
+    receivedPostId: postId,
+    hasPassedPost: !!passedPost,
+    foundPost: post
+      ? {
+          id: post._id,
+          title: post.title,
+          category: post.category,
+        }
+      : "not found",
+    availablePosts: allPosts.map((p) => ({
+      id: p._id,
+      title: p.title,
+    })),
+  });
+
+  // Debug log
+  console.log("Viewing post detail for ID:", postId);
 
   // Event Handlers
   const handleBookmarkToggle = () => {

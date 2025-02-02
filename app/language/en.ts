@@ -88,6 +88,7 @@ const en = {
   reportReason: "Why are you reporting this post?",
   reportSuccess: "Thank you for reporting this post",
   reportError: "Could not submit report",
+  quickActions: "Quick Actions",
 };
 
 export default en;
