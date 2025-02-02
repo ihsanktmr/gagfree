@@ -1,18 +1,21 @@
 import React, { useState } from "react";
 
-import { useNavigation } from "@react-navigation/native";
+import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { distances } from "app/aesthetic/distances";
 import { SearchHeader } from "app/components/common/SearchHeader";
 import { ThemedView } from "app/components/containers/ThemedView";
 import ChatList from "app/components/lists/chat/ChatList";
+import { RootStackParamList } from "app/navigation/types";
 import { archiveChat, setSearchQuery } from "app/redux/chat/actions";
 import { selectActiveChats, selectSearchQuery } from "app/redux/chat/selectors";
 import { StyleSheet } from "react-native";
 import { IconButton } from "react-native-paper";
 import { useDispatch, useSelector } from "react-redux";
 
+type NavigationProps = NavigationProp<RootStackParamList>;
+
 export function ChatsScreen() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProps>();
   const dispatch = useDispatch();
   const [showSearch, setShowSearch] = useState(false);
   const searchQuery = useSelector(selectSearchQuery);
@@ -23,7 +26,12 @@ export function ChatsScreen() {
   };
 
   const handleChatPress = (chatId: string) => {
-    navigation.navigate("ChatDetail", { chatId });
+    navigation.navigate("ChatDetail", {
+      chatId,
+      postId: "mock-post-id", // Mock data
+      title: "Chat", // Default title
+      otherUserId: "mock-user-id", // Mock data
+    });
   };
 
   const handleArchive = (chatId: string) => {

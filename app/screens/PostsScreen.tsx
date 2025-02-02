@@ -1,6 +1,5 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
-import { useNavigation } from "@react-navigation/native";
 import { distances } from "app/aesthetic/distances";
 import { AddPostModal } from "app/components/postComponents/AddPostModal";
 import { PostsContent } from "app/components/postComponents/PostsContent";
@@ -12,13 +11,15 @@ import { setPosts } from "app/redux/post/actions";
 import { selectTheme } from "app/redux/theme/selectors";
 import { MOCK_POSTS } from "app/services/mockData";
 import { StyleSheet, View } from "react-native";
+import { Region } from "react-native-maps";
 import { useDispatch, useSelector } from "react-redux";
 
-import { PostsScreenProps } from "./types";
+interface PostsScreenProps {
+  initialRegion: Region;
+}
 
 export const PostsScreen: React.FC<PostsScreenProps> = ({ initialRegion }) => {
   const dispatch = useDispatch();
-  const navigation = useNavigation();
   const theme = useSelector(selectTheme);
   const backgroundColor = useThemeColor("background");
 

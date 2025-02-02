@@ -3,12 +3,22 @@ import {
   NavigatorScreenParams,
   RouteProp,
 } from "@react-navigation/native";
+import { Post } from "app/redux/post/types";
+import { Region } from "react-native-maps";
 
 export type RootStackParamList = {
+  Posts: { initialRegion: Region };
+  PostDetail: { postId: string; post?: Post };
+  ChatDetail: {
+    chatId: string;
+    postId: string;
+    title: string;
+    otherUserId: string;
+  };
+  Chat: undefined;
+  Settings: undefined;
   Main: NavigatorScreenParams<MainTabParamList>;
   Onboarding: undefined;
-  PostDetail: { postId: string };
-  ChatDetail: { chatId: string };
   ArchivedChats: undefined;
   BookmarksScreen: undefined;
   NotificationsScreen: undefined;
@@ -37,3 +47,10 @@ export type MainTabScreenProps<T extends keyof MainTabParamList> = {
   navigation: NavigationProp<MainTabParamList, T>;
   route: RouteProp<MainTabParamList, T>;
 };
+
+export interface Chat {
+  id: string;
+  postId: string;
+  title?: string;
+  otherUserId: string;
+}

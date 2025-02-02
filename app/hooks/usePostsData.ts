@@ -8,12 +8,17 @@ export const usePostsData = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-  // Get unique categories
+  // Get unique categories and ensure they're all strings
   const categories = useMemo(() => {
-    const uniqueCategories = [
-      ...new Set(postsData.map((post) => post.category).filter(Boolean)),
-    ];
-    return uniqueCategories.sort();
+    const uniqueCategories = new Set<string>();
+
+    postsData.forEach((post) => {
+      if (post?.category && typeof post.category === "string") {
+        uniqueCategories.add(post.category);
+      }
+    });
+
+    return Array.from(uniqueCategories).sort();
   }, [postsData]);
 
   // Filter posts based on category and search query
@@ -42,6 +47,7 @@ export const usePostsData = () => {
       const searchTerms = searchQuery.toLowerCase().trim().split(" ");
       filtered = filtered.filter((post) => {
         const searchableText = [post.title, post.description, post.category]
+          .filter(Boolean)
           .join(" ")
           .toLowerCase();
         return searchTerms.every((term) => searchableText.includes(term));

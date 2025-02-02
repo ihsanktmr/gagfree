@@ -1,7 +1,7 @@
 import React from "react";
 
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { distances } from "app/aesthetic/distances";
 import { borderRadii } from "app/aesthetic/styleConstants";
 import { typography } from "app/aesthetic/typography";
@@ -10,15 +10,18 @@ import { ThemedView } from "app/components/containers/ThemedView";
 import { ThemedText } from "app/components/texts/ThemedText";
 import { useThemeColor } from "app/hooks/useThemeColor";
 import { i18n } from "app/language";
+import { RootStackParamList } from "app/navigation/types";
 import { setOnboardingSeen } from "app/redux/misc/actions";
 import { triggerHeavyFeedback } from "app/utils/haptics";
 import { Image, StyleSheet, View } from "react-native";
 import Swiper from "react-native-swiper";
 import { useDispatch } from "react-redux";
 
+type NavigationProps = NavigationProp<RootStackParamList>;
+
 export function OnboardingScreen() {
   const dispatch = useDispatch();
-  const { replace } = useNavigation();
+  const navigation = useNavigation<NavigationProps>();
 
   const iconColor = useThemeColor("background");
   const textColor = useThemeColor("text");
@@ -26,7 +29,10 @@ export function OnboardingScreen() {
   const handleNextPress = () => {
     triggerHeavyFeedback();
     dispatch(setOnboardingSeen());
-    replace("Main");
+    navigation.reset({
+      index: 0,
+      routes: [{ name: "Main" }],
+    });
   };
 
   return (

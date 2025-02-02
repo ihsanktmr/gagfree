@@ -1,13 +1,14 @@
-import React from "react";
+import React, { useCallback, useMemo } from "react";
 
 import { distances } from "app/aesthetic/distances";
 import { useThemeColor } from "app/hooks/useThemeColor";
 import { i18n } from "app/language";
-import { StyleSheet, View } from "react-native";
-import { FlatList } from "react-native";
-import { IconButton } from "react-native-paper";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
+import { FlatList, ListRenderItem } from "react-native";
 
 import { FilterChip } from "../common/FilterChip";
+import { Icon } from "../common/Icon";
+import { MaterialIconName } from "../common/Icon";
 import { SearchHeader } from "../common/SearchHeader";
 
 interface PostsHeaderProps {
@@ -36,98 +37,111 @@ export const PostsHeader: React.FC<PostsHeaderProps> = ({
   const iconColor = useThemeColor("icon");
   const isViewMap = view === "map";
 
-  const handleSearchPress = () => {
+  const handleSearchPress = useCallback(() => {
     if (view === "list") {
       setShowSearch(true);
     }
-  };
+  }, [view, setShowSearch]);
 
-  const handleSearchClose = () => {
+  const handleSearchClose = useCallback(() => {
     setShowSearch(false);
     setSearchQuery("");
-  };
+  }, [setShowSearch, setSearchQuery]);
 
-  const handleCategoryPress = (category: string) => {
-    console.log("PostsHeader - Category press handler");
-    console.log("Current selected:", selectedCategory);
-    console.log("Pressed category:", category);
+  const handleCategoryPress = useCallback(
+    (category: string) => {
+      setSelectedCategory(selectedCategory === category ? null : category);
+    },
+    [selectedCategory, setSelectedCategory],
+  );
 
-    // Toggle category selection
-    if (selectedCategory === category) {
-      console.log("Deselecting category");
-      setSelectedCategory(null);
-    } else {
-      console.log("Selecting new category");
-      setSelectedCategory(category);
+  const handleViewToggle = useCallback(() => {
+    setView(isViewMap ? "list" : "map");
+    if (showSearch) {
+      handleSearchClose();
     }
-  };
+  }, [isViewMap, setView, showSearch, handleSearchClose]);
 
-  console.log("PostsHeader - Current selected category:", selectedCategory);
-  console.log("PostsHeader - Available categories:", categories);
+  const viewIcon: MaterialIconName = useMemo(
+    () => (isViewMap ? "view-list" : "map"),
+    [isViewMap],
+  );
+
+  const renderCategory: ListRenderItem<string> = useCallback(
+    ({ item }) => (
+      <FilterChip
+        label={item}
+        selected={selectedCategory === item}
+        onPress={() => handleCategoryPress(item)}
+      />
+    ),
+    [selectedCategory, handleCategoryPress],
+  );
+
+  const keyExtractor = useCallback((item: string) => item, []);
+
+  const renderRightIcon = useMemo(
+    () => (
+      <TouchableOpacity onPress={handleViewToggle} style={styles.iconContainer}>
+        <Icon type="material" name={viewIcon} color={iconColor} size={24} />
+      </TouchableOpacity>
+    ),
+    [viewIcon, iconColor, handleViewToggle],
+  );
 
   return (
-    <>
-      <SearchHeader
-        title={i18n.t("posts")}
-        showSearch={showSearch}
-        onSearchPress={() => view === "list" && setShowSearch(true)}
-        onSearchClose={() => {
-          setShowSearch(false);
-          setSearchQuery("");
-        }}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        hideSearchIcon={isViewMap}
-        placeholder={i18n.t("searchPosts")}
-        rightIcon={
-          <IconButton
-            icon={isViewMap ? "view-list" : "map"}
-            iconColor={iconColor}
-            onPress={() => {
-              setView(isViewMap ? "list" : "map");
-              if (showSearch) {
-                setShowSearch(false);
-                setSearchQuery("");
-              }
-            }}
-          />
-        }
-      />
+    <View style={styles.container}>
+      <View style={styles.headerContainer}>
+        <SearchHeader
+          title={i18n.t("posts")}
+          showSearch={showSearch}
+          onSearchPress={handleSearchPress}
+          onSearchClose={handleSearchClose}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          hideSearchIcon={isViewMap}
+          placeholder={i18n.t("searchPosts")}
+          rightIcon={renderRightIcon}
+        />
+      </View>
 
       <View style={styles.filterContainer}>
         <FlatList
           horizontal
           data={categories}
-          keyExtractor={(item) => item}
-          renderItem={({ item }) => {
-            console.log(
-              `Rendering chip for category: ${item}, Selected: ${selectedCategory === item}`,
-            );
-            return (
-              <FilterChip
-                label={item}
-                selected={selectedCategory === item}
-                onPress={() => handleCategoryPress(item)}
-              />
-            );
-          }}
+          keyExtractor={keyExtractor}
+          renderItem={renderCategory}
           showsHorizontalScrollIndicator={false}
           style={styles.categoryList}
           contentContainerStyle={styles.categoryListContent}
         />
       </View>
-    </>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  container: {
+    paddingTop: distances.lg,
+  },
+  headerContainer: {
+    paddingHorizontal: distances.md,
+    marginBottom: distances.sm,
+  },
+  iconContainer: {
+    padding: distances.sm,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   filterContainer: {
-    padding: distances.md,
+    paddingVertical: distances.sm,
+    paddingHorizontal: distances.md,
   },
   categoryList: {
-    marginTop: distances.sm,
+    flexGrow: 0,
   },
   categoryListContent: {
     paddingRight: distances.md,
+    alignItems: "center",
   },
 });
