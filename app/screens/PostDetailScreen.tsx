@@ -268,11 +268,11 @@ const PostDetailScreen = () => {
             contentStyle={styles.menuContent}
           >
             <Menu.Item
-              onPress={handleStartChat}
-              title="Message Seller"
+              onPress={handleSharePost}
+              title="Share Post"
               leadingIcon={() => (
                 <Ionicons
-                  name="chatbubble-outline"
+                  name="share-social-outline"
                   size={24}
                   color={iconColor}
                 />
@@ -318,9 +318,9 @@ const PostDetailScreen = () => {
 
           <View style={styles.actionButtons}>
             {renderActionButton(
-              "share-social-outline",
-              i18n.t("share"),
-              handleSharePost,
+              "chatbubble-outline",
+              i18n.t("messageSeller"),
+              handleStartChat,
             )}
             {renderActionButton(
               isBookmarked ? "bookmark" : "bookmark-outline",
@@ -400,12 +400,15 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-around",
     marginVertical: distances.md,
+    paddingHorizontal: distances.xl,
   },
   actionButton: {
     alignItems: "center",
+    paddingVertical: distances.sm,
+    minWidth: 100,
   },
   actionButtonText: {
-    fontSize: 12,
+    fontSize: 14,
     fontFamily: typography.secondary.medium,
     marginTop: distances.xxs,
   },
