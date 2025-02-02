@@ -49,12 +49,21 @@ const ChatComponent: React.FC<ChatComponentProps> = ({
   };
 
   const handleArchive = () => {
-    if (chat.isArchived) {
-      onUnarchive?.(chat.id);
-    } else {
-      onArchive?.(chat.id);
-    }
-    rowRef.current?.closeRow();
+    // Same fade out animation as delete
+    Animated.timing(fadeAnim, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => {
+      if (chat.isArchived) {
+        onUnarchive?.(chat.id);
+      } else {
+        onArchive?.(chat.id);
+      }
+      rowRef.current?.closeRow();
+      // Reset opacity for next render
+      fadeAnim.setValue(1);
+    });
   };
 
   const renderHiddenItem = () => (
