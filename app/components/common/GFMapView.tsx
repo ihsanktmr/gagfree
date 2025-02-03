@@ -1,21 +1,27 @@
-import React, { useRef } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 
 import { Ionicons } from "@expo/vector-icons";
+import { distances } from "app/aesthetic/distances";
 import { isIos } from "app/appInfo";
 import { ThemedView } from "app/components/containers/ThemedView";
 import { ThemedText } from "app/components/texts/ThemedText";
 import { Post } from "app/redux/post/types";
 import { Image, StyleSheet, View } from "react-native";
-import MapView, { Callout, Marker, Region } from "react-native-maps";
+import MapView, {
+  Callout,
+  Marker,
+  PROVIDER_DEFAULT,
+  Region,
+} from "react-native-maps";
 
-type ThemeProps = {
+interface ThemeProps {
   currentTheme: string;
   mainColor: string;
   iconColor: string;
   backgroundColor: string;
-};
+}
 
-type MapViewComponentProps = {
+interface MapViewComponentProps {
   posts: Post[];
   region: Region;
   setRegion: (region: Region) => void;
@@ -25,9 +31,12 @@ type MapViewComponentProps = {
   mapCustomStyleDark: any;
   onMarkerPress: (post: Post) => void;
   onCalloutPress: (postId: string) => void;
-};
+  showsUserLocation?: boolean;
+  zoomLevel?: number;
+}
 
 const MIN_ZOOM_DELTA = 0.008;
+const ANIMATION_DURATION = 1000;
 
 export const MapViewComponent: React.FC<MapViewComponentProps> = ({
   posts,
@@ -39,91 +48,118 @@ export const MapViewComponent: React.FC<MapViewComponentProps> = ({
   mapCustomStyleDark,
   onMarkerPress,
   onCalloutPress,
+  showsUserLocation = true,
+  zoomLevel = MIN_ZOOM_DELTA,
 }) => {
   const mapViewRef = useRef<MapView | null>(null);
+  const [isMapReady, setIsMapReady] = useState(false);
 
-  const renderMarker = (post: Post) => {
-    if (!post.contact) return null;
-    return (
-      <Marker
-        key={post._id}
-        coordinate={{
-          latitude: post.contact.latitude,
-          longitude: post.contact.longitude,
-        }}
-        pinColor={theme.mainColor}
-        title={post.title}
-        description={post.description}
-        onPress={() => {
-          mapViewRef.current?.animateToRegion(
-            {
-              latitude: post.contact.latitude,
-              longitude: post.contact.longitude,
-              latitudeDelta: MIN_ZOOM_DELTA,
-              longitudeDelta: MIN_ZOOM_DELTA,
-            },
-            1000,
-          );
-          onMarkerPress(post);
-        }}
-        tracksViewChanges={false}
-      >
-        {isIos && (
-          <Callout
-            tooltip
-            style={[
-              styles.calloutContainer2,
-              { backgroundColor: theme.backgroundColor },
-            ]}
-            onPress={() => onCalloutPress(post._id)}
-          >
-            <ThemedView style={styles.calloutContainer}>
-              <View style={styles.calloutTitleContainer}>
-                <View style={styles.calloutOverviewContainer}>
-                  <ThemedText numberOfLines={1} style={styles.calloutTitle}>
-                    {post.title}
-                  </ThemedText>
-                </View>
-                <Ionicons
-                  name="arrow-forward"
-                  size={20}
-                  color={theme.iconColor}
-                />
-              </View>
-              <ThemedText numberOfLines={12} style={styles.calloutDescription}>
-                {post.description}
-              </ThemedText>
-              {post.images?.length > 0 && (
-                <Image
-                  source={{ uri: post.images[0]?.imageUrl }}
-                  style={styles.calloutImage}
-                  resizeMode="cover"
-                />
-              )}
-            </ThemedView>
-          </Callout>
+  const mapStyle = useMemo(
+    () => (theme.currentTheme === "dark" ? mapCustomStyleDark : mapCustomStyle),
+    [theme.currentTheme, mapCustomStyle, mapCustomStyleDark],
+  );
+
+  const handleMapReady = useCallback(() => {
+    setIsMapReady(true);
+  }, []);
+
+  const handleMarkerPress = useCallback(
+    (post: Post) => {
+      if (!post.contact?.latitude || !post.contact?.longitude) return;
+
+      const newRegion = {
+        latitude: post.contact.latitude,
+        longitude: post.contact.longitude,
+        latitudeDelta: zoomLevel,
+        longitudeDelta: zoomLevel,
+      };
+
+      mapViewRef.current?.animateToRegion(newRegion, ANIMATION_DURATION);
+      onMarkerPress(post);
+    },
+    [onMarkerPress, zoomLevel],
+  );
+
+  const CalloutContent = useCallback(
+    ({ post }: { post: Post }) => (
+      <ThemedView style={styles.calloutContainer}>
+        <View style={styles.calloutTitleContainer}>
+          <View style={styles.calloutOverviewContainer}>
+            <ThemedText numberOfLines={1} style={styles.calloutTitle}>
+              {post.title}
+            </ThemedText>
+          </View>
+          <Ionicons name="arrow-forward" size={20} color={theme.iconColor} />
+        </View>
+        <ThemedText numberOfLines={12} style={styles.calloutDescription}>
+          {post.description}
+        </ThemedText>
+        {post.images?.[0]?.imageUrl && (
+          <Image
+            source={{ uri: post.images[0].imageUrl }}
+            style={styles.calloutImage}
+            resizeMode="cover"
+          />
         )}
-      </Marker>
-    );
-  };
+      </ThemedView>
+    ),
+    [theme.iconColor],
+  );
+
+  const renderMarker = useCallback(
+    (post: Post) => {
+      if (!post.contact?.latitude || !post.contact?.longitude) return null;
+
+      return (
+        <Marker
+          key={post._id}
+          coordinate={{
+            latitude: post.contact.latitude,
+            longitude: post.contact.longitude,
+          }}
+          pinColor={theme.mainColor}
+          title={post.title}
+          description={post.description}
+          onPress={() => handleMarkerPress(post)}
+          tracksViewChanges={false}
+        >
+          {isIos && (
+            <Callout
+              tooltip
+              style={[
+                styles.calloutWrapper,
+                { backgroundColor: theme.backgroundColor },
+              ]}
+              onPress={() => onCalloutPress(post._id)}
+            >
+              <CalloutContent post={post} />
+            </Callout>
+          )}
+        </Marker>
+      );
+    },
+    [theme, handleMarkerPress, onCalloutPress],
+  );
+
+  const markers = useMemo(() => posts.map(renderMarker), [posts, renderMarker]);
 
   return (
     <MapView
-      customMapStyle={
-        theme.currentTheme === "dark" ? mapCustomStyleDark : mapCustomStyle
-      }
+      provider={PROVIDER_DEFAULT}
+      customMapStyle={mapStyle}
       ref={mapViewRef}
       initialRegion={initialRegion}
       region={region}
       onRegionChangeComplete={setRegion}
-      userInterfaceStyle={theme.currentTheme}
-      showsUserLocation
+      userInterfaceStyle={theme.currentTheme as "light" | "dark"}
+      showsUserLocation={showsUserLocation}
       showsMyLocationButton={false}
       zoomEnabled
       scrollEnabled
       style={styles.map}
+      onMapReady={handleMapReady}
     >
-      {posts.map(renderMarker)}
+      {isMapReady && markers}
     </MapView>
   );
 };
@@ -133,22 +169,23 @@ const styles = StyleSheet.create({
     height: "100%",
     width: "100%",
   },
+  calloutWrapper: {
+    borderRadius: distances.sm,
+    overflow: "hidden",
+  },
   calloutContainer: {
     width: 200,
-    padding: 8,
-    borderRadius: 8,
+    padding: distances.sm,
+    borderRadius: distances.sm,
   },
   calloutTitleContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 4,
+    marginBottom: distances.xs,
   },
   calloutOverviewContainer: {
     flexDirection: "column",
-  },
-  calloutContainer2: {
-    borderRadius: 8,
   },
   calloutTitle: {
     fontSize: 16,
@@ -156,11 +193,11 @@ const styles = StyleSheet.create({
   },
   calloutDescription: {
     fontSize: 12,
-    marginBottom: 8,
+    marginBottom: distances.sm,
   },
   calloutImage: {
     width: "100%",
     height: 100,
-    borderRadius: 8,
+    borderRadius: distances.sm,
   },
 });
