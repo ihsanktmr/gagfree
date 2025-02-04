@@ -15,3 +15,12 @@ export interface ChatState {
   error: string | null;
   searchQuery: string;
 }
+
+export type MessageSender = "user" | "other";
+
+export interface Message {
+  id: string;
+  text: string;
+  timestamp: string;
+  sender: MessageSender;
+}

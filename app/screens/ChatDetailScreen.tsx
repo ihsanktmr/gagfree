@@ -1,19 +1,24 @@
 import React, { useRef, useState } from "react";
 
 import Entypo from "@expo/vector-icons/build/Entypo";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { isIos } from "app/appInfo";
 import { Header } from "app/components/common/Header";
 import { ThemedView } from "app/components/containers/ThemedView";
-import MessageList from "app/components/lists/chat/MessageList";
+import MessageList, {
+  MessageListRef,
+} from "app/components/lists/chat/MessageList";
 import ChatInputBar from "app/components/textInputs/ChatInputBar";
 import { useThemeColor } from "app/hooks/useThemeColor";
+import { RootStackParamList } from "app/navigation/types";
 import { archiveChat } from "app/redux/chat/actions";
+import { Message, MessageSender } from "app/redux/chat/types";
 import { Alert, KeyboardAvoidingView, Share, StyleSheet } from "react-native";
 import { Menu } from "react-native-paper";
 import { useDispatch } from "react-redux";
 
-const mockMessages = [
+const mockMessages: Message[] = [
   {
     id: "1",
     text: "Hey! How's it going?",
@@ -28,17 +33,24 @@ const mockMessages = [
   },
 ];
 
+type ChatDetailScreenNavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  "ChatDetail"
+>;
+
+type ChatDetailScreenRouteProp = RouteProp<RootStackParamList, "ChatDetail">;
+
 export function ChatDetailScreen() {
-  const [messages, setMessages] = useState(mockMessages);
+  const [messages, setMessages] = useState<Message[]>(mockMessages);
   const [menuVisible, setMenuVisible] = useState(false);
-  const navigation = useNavigation();
-  const route = useRoute();
+  const navigation = useNavigation<ChatDetailScreenNavigationProp>();
+  const route = useRoute<ChatDetailScreenRouteProp>();
   const dispatch = useDispatch();
-  const { chatId, chatTitle, otherUserId } = route.params;
+  const { chatId, title: chatTitle, otherUserId } = route.params;
 
   const iconColor = useThemeColor("icon");
   const backgroundColor = useThemeColor("background");
-  const messageListRef = useRef<any>(null);
+  const messageListRef = useRef<MessageListRef>(null);
 
   const handleGoBack = () => navigation.goBack();
 
@@ -176,18 +188,15 @@ export function ChatDetailScreen() {
   );
 
   const handleSendMessage = (text: string) => {
-    const newMessage = {
+    const newMessage: Message = {
       id: (messages.length + 1).toString(),
       text,
       timestamp: new Date().toISOString(),
-      sender: "user",
+      sender: "user" as MessageSender,
     };
     setMessages((prevMessages) => [...prevMessages, newMessage]);
 
-    // Scroll to the bottom after adding a new message
-    if (messageListRef.current) {
-      messageListRef.current.scrollToEnd();
-    }
+    messageListRef.current?.scrollToEnd();
   };
 
   return (
