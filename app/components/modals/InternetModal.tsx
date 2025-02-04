@@ -1,12 +1,12 @@
 import React from "react";
 
 import { distances } from "app/aesthetic/distances";
-import { borderRadii } from "app/aesthetic/styleConstants";
-import { ThemedText } from "app/components/texts/ThemedText";
-import { useThemeColor } from "app/hooks/useThemeColor";
 import { i18n } from "app/language";
 import { StyleSheet, View } from "react-native";
-import { Button, Modal } from "react-native-paper";
+import { Button } from "react-native-paper";
+
+import { BaseModal } from "../common/Modal";
+import { ThemedText } from "../texts/ThemedText";
 
 interface InternetModalProps {
   visible: boolean;
@@ -19,39 +19,36 @@ export const InternetModal: React.FC<InternetModalProps> = ({
   onRetry,
   onDismiss,
 }) => {
-  const backgroundColor = useThemeColor("background");
-
   return (
-    <Modal
+    <BaseModal
       visible={visible}
       onDismiss={onDismiss}
-      style={styles.modalStyle}
-      contentContainerStyle={[styles.modalContainer, { backgroundColor }]}
+      width="80%"
+      contentStyle={styles.contentContainer}
     >
-      <ThemedText style={styles.modalText}>{i18n.t("noInternet")}</ThemedText>
-      <View style={styles.modalActions}>
-        <Button mode="contained" onPress={onRetry}>
-          {i18n.t("retry")}
-        </Button>
-        <View style={styles.modalSpacer} />
-        <Button mode="contained" onPress={onDismiss}>
-          {i18n.t("okay")}
-        </Button>
+      <View style={styles.content}>
+        <ThemedText style={styles.modalText}>{i18n.t("noInternet")}</ThemedText>
+        <View style={styles.modalActions}>
+          <Button mode="contained" onPress={onRetry}>
+            {i18n.t("retry")}
+          </Button>
+          <View style={styles.modalSpacer} />
+          <Button mode="contained" onPress={onDismiss}>
+            {i18n.t("okay")}
+          </Button>
+        </View>
       </View>
-    </Modal>
+    </BaseModal>
   );
 };
 
 const styles = StyleSheet.create({
-  modalContainer: {
-    width: "80%",
-    marginHorizontal: distances.md,
+  contentContainer: {
     padding: distances.md,
-    borderRadius: borderRadii.large,
   },
-  modalStyle: {
-    justifyContent: "center",
+  content: {
     alignItems: "center",
+    justifyContent: "center",
   },
   modalText: {
     fontSize: 14,
@@ -60,9 +57,10 @@ const styles = StyleSheet.create({
   },
   modalActions: {
     flexDirection: "row",
-    justifyContent: "flex-end",
+    justifyContent: "center",
+    width: "100%",
   },
   modalSpacer: {
-    width: 10,
+    width: distances.sm,
   },
 });
