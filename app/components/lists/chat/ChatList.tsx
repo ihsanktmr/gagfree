@@ -1,8 +1,9 @@
 import React from "react";
 
+import { List } from "app/components/common/List";
 import { useThemeColor } from "app/hooks/useThemeColor";
 import { Chat } from "app/redux/chat/types";
-import { FlatList, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 
 import ChatComponent from "./ChatComponent";
 
@@ -23,9 +24,9 @@ const ChatList: React.FC<ChatListProps> = ({
 
   return (
     <View style={[styles.container, { backgroundColor }]}>
-      <FlatList
+      <List<Chat>
         data={chats}
-        renderItem={({ item }) => (
+        renderItem={(item) => (
           <ChatComponent
             chat={item}
             onPress={onChatPress}
@@ -34,9 +35,6 @@ const ChatList: React.FC<ChatListProps> = ({
           />
         )}
         keyExtractor={(item) => item.id}
-        showsVerticalScrollIndicator={false}
-        style={styles.list}
-        contentContainerStyle={styles.contentContainer}
       />
     </View>
   );

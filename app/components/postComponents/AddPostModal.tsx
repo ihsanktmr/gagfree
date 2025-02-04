@@ -1,7 +1,6 @@
 import React, { useRef } from "react";
 
 import { ItemDetails, PickupDetails } from "app/screens/types";
-import { StyleSheet, View } from "react-native";
 
 import { SwiperTutorialModal } from "../modals/SwiperAddModal";
 import { ItemDetailsStep } from "./ItemDetailsStep";
@@ -93,9 +92,3 @@ export const AddPostModal: React.FC<AddPostModalProps> = ({
     </SwiperTutorialModal>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});
