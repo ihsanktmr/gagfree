@@ -30,6 +30,7 @@ export const Icon: React.FC<IconProps> = ({
         size={size}
         color={color}
         style={style}
+        testID="main-icon"
       />
     );
   }
@@ -39,6 +40,7 @@ export const Icon: React.FC<IconProps> = ({
       size={size}
       color={color}
       style={style}
+      testID="main-icon"
     />
   );
 };
