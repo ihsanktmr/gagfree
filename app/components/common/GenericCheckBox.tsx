@@ -14,8 +14,18 @@ export const GenericCheckBox: FC<GenericCheckBoxProps> = ({ selected }) => {
   const iconColor = useThemeColor("background");
 
   return (
-    <View style={[styles.genericCheckBox, { borderColor, backgroundColor }]}>
-      {selected && <Ionicons name="checkmark" size={18} color={iconColor} />}
+    <View
+      testID="generic-checkbox"
+      style={[styles.genericCheckBox, { borderColor, backgroundColor }]}
+    >
+      {selected && (
+        <Ionicons
+          testID="checkmark-icon"
+          name="checkmark"
+          size={18}
+          color={iconColor}
+        />
+      )}
     </View>
   );
 };
