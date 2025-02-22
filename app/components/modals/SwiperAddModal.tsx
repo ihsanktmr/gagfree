@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from "react";
 
 import { distances } from "app/aesthetic/distances";
 import { borderRadii } from "app/aesthetic/styleConstants";
+import { typography } from "app/aesthetic/typography";
 import { useThemeColor } from "app/hooks/useThemeColor";
 import { StyleSheet, View } from "react-native";
 import { Button, Modal } from "react-native-paper";
@@ -17,7 +18,7 @@ interface SwiperTutorialModalProps {
     title: string;
     content: string;
     buttonText: string;
-    onStepComplete: () => void;
+    onStepComplete?: () => Promise<boolean> | boolean;
   }[];
   children?: React.ReactNode;
   currentIndex: number;
@@ -44,11 +45,10 @@ export const SwiperTutorialModal: React.FC<SwiperTutorialModalProps> = ({
   const handleNextStep = async () => {
     const currentStep = steps[currentIndex];
 
-    if (currentStep.onStepComplete) {
-      const isValid = await currentStep.onStepComplete();
-
-      // Only proceed if validation passes
-      if (!isValid) {
+    // Check if onStepComplete exists and execute it
+    if (typeof currentStep.onStepComplete === "function") {
+      const result = await Promise.resolve(currentStep.onStepComplete());
+      if (!result) {
         return;
       }
     }
@@ -59,6 +59,9 @@ export const SwiperTutorialModal: React.FC<SwiperTutorialModalProps> = ({
       setCurrentIndex(0);
       return;
     }
+
+    // Move to next step if not last
+    setCurrentIndex(currentIndex + 1);
   };
 
   return (
@@ -83,6 +86,9 @@ export const SwiperTutorialModal: React.FC<SwiperTutorialModalProps> = ({
             showsPagination={true}
             removeClippedSubviews={false}
             onIndexChanged={setCurrentIndex}
+            paginationStyle={styles.pagination}
+            dotStyle={styles.paginationDot}
+            activeDotStyle={styles.activePaginationDot}
           >
             {steps.map((step, index) => (
               <View key={index} style={styles.slideContent}>
@@ -91,6 +97,7 @@ export const SwiperTutorialModal: React.FC<SwiperTutorialModalProps> = ({
             ))}
           </Swiper>
         </View>
+
         <ThemedView style={styles.buttonContainer}>
           <Button
             mode="contained"
@@ -108,10 +115,7 @@ export const SwiperTutorialModal: React.FC<SwiperTutorialModalProps> = ({
 const styles = StyleSheet.create({
   modalContainer: {
     width: "90%",
-    maxHeight: "80%",
     marginHorizontal: distances.md,
-    padding: distances.md,
-    borderRadius: borderRadii.large,
   },
   modalStyle: {
     justifyContent: "center",
@@ -119,7 +123,8 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     flex: 1,
-    minHeight: 400, // Add minimum height
+    minHeight: 500, // Add minimum height
+    borderRadius: borderRadii.large,
   },
   titleContainer: {
     marginBottom: distances.md,
@@ -127,8 +132,12 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 16,
-    fontWeight: "bold",
-    textAlign: "left",
+    fontFamily: typography.primary.medium,
+    letterSpacing: 0.5,
+    textAlign: "center",
+    marginVertical: distances.md,
+    textTransform: "uppercase",
+    opacity: 0.9,
   },
   swiperContainer: {
     flex: 1,
@@ -137,6 +146,7 @@ const styles = StyleSheet.create({
   slideContent: {
     flex: 1,
     paddingHorizontal: distances.md,
+    paddingBottom: distances.xl, // Add more padding for pagination
   },
   bodyText: {
     fontSize: 14,
@@ -145,10 +155,27 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: "row",
     justifyContent: "center",
-    marginTop: distances.md,
-    paddingVertical: distances.sm,
+    marginBottom: distances.md,
+    paddingVertical: distances.md,
+    borderRadius: borderRadii.large,
   },
   button: {
     minWidth: 120, // Add minimum width for button
+  },
+  pagination: {
+    bottom: -15, // Adjust if needed
+    paddingVertical: distances.md,
+  },
+  paginationDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginHorizontal: 4,
+  },
+  activePaginationDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginHorizontal: 4,
   },
 });
