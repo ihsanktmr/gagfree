@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 
+import { ApolloProvider } from "@apollo/client";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
@@ -15,6 +16,7 @@ import AppNavigator from "./navigation";
 import { LanguageProvider } from "./providers/LanguageProvider";
 import { SnackbarProvider } from "./providers/SnackbarProvider";
 import { persistor, store } from "./redux";
+import { client } from "./services/client";
 import { isConnected, setupConnectivityListener } from "./utils/netCheck";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -57,24 +59,26 @@ export default function App() {
   return (
     <Provider store={store}>
       <PersistGate persistor={persistor}>
-        <React.Fragment>
-          <SafeAreaProvider>
-            <PaperProvider>
-              <LanguageProvider>
-                <SnackbarProvider>
-                  <AppNavigator />
-                  <StatusBar style="auto" />
+        <ApolloProvider client={client}>
+          <React.Fragment>
+            <SafeAreaProvider>
+              <PaperProvider>
+                <LanguageProvider>
+                  <SnackbarProvider>
+                    <AppNavigator />
+                    <StatusBar style="auto" />
 
-                  <InternetModal
-                    visible={internetModalVisible}
-                    onRetry={retryConnection}
-                    onDismiss={() => setInternetModalVisible(false)}
-                  />
-                </SnackbarProvider>
-              </LanguageProvider>
-            </PaperProvider>
-          </SafeAreaProvider>
-        </React.Fragment>
+                    <InternetModal
+                      visible={internetModalVisible}
+                      onRetry={retryConnection}
+                      onDismiss={() => setInternetModalVisible(false)}
+                    />
+                  </SnackbarProvider>
+                </LanguageProvider>
+              </PaperProvider>
+            </SafeAreaProvider>
+          </React.Fragment>
+        </ApolloProvider>
       </PersistGate>
     </Provider>
   );

@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 
+import { useMutation, useQuery } from "@apollo/client";
 import { distances } from "app/aesthetic/distances";
 import { AddPostModal } from "app/components/postComponents/AddPostModal";
 import { PostsContent } from "app/components/postComponents/PostsContent";
@@ -10,15 +11,35 @@ import { usePostsData } from "app/hooks/usePostsData";
 import { useThemeColor } from "app/hooks/useThemeColor";
 import { initializePosts, setPosts } from "app/redux/post/actions";
 import { selectTheme } from "app/redux/theme/selectors";
-import { StyleSheet, View } from "react-native";
+import { Alert, StyleSheet, View } from "react-native";
 import { Region } from "react-native-maps";
 import { useDispatch, useSelector } from "react-redux";
+
+import { CREATE_ITEM, DELETE_ITEM, GET_ITEMS } from "../services/postServices";
 
 interface PostsScreenProps {
   initialRegion: Region;
 }
 
 export const PostsScreen: React.FC<PostsScreenProps> = ({ initialRegion }) => {
+  // Query for fetching items
+  const { data, loading, error, refetch } = useQuery(GET_ITEMS, {
+    variables: {
+      limit: 10,
+      offset: 0,
+    },
+  });
+
+  // Mutation for deleting an item
+  const [deleteItem] = useMutation(DELETE_ITEM, {
+    onCompleted: () => {
+      refetch(); // Refresh the list after deletion
+    },
+  });
+
+  // Mutation for creating an item
+  const [createItem] = useMutation(CREATE_ITEM);
+
   const dispatch = useDispatch();
   const theme = useSelector(selectTheme);
   const backgroundColor = useThemeColor("background");
@@ -63,6 +84,26 @@ export const PostsScreen: React.FC<PostsScreenProps> = ({ initialRegion }) => {
   const handleSuccess = useCallback(() => {
     setAddModalVisible(false);
   }, []);
+
+  // Handle item creation
+  const handleCreate = async (itemData: any) => {
+    try {
+      await createItem({
+        variables: {
+          input: {
+            title: itemData.title,
+            description: itemData.description,
+            category: itemData.category,
+            images: itemData.images || [],
+            location: itemData.location,
+          },
+        },
+      });
+      refetch(); // Refresh the list after creation
+    } catch (error) {
+      Alert.alert("Error", "Failed to create item");
+    }
+  };
 
   const postForm = usePostForm(handleSuccess);
 
