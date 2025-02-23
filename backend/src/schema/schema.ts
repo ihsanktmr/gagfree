@@ -4,6 +4,7 @@ export const typeDefs = gql`
   # Custom scalar types
   scalar DateTime
   scalar URL
+  scalar Upload
 
   # Enums
   enum ItemStatus {
@@ -91,7 +92,7 @@ export const typeDefs = gql`
     title: String!
     description: String!
     category: String!
-    images: [String!]!
+    images: [Upload!]!
     location: String
   }
 
@@ -99,7 +100,7 @@ export const typeDefs = gql`
     title: String
     description: String
     category: String
-    images: [String!]
+    images: [Upload]
     status: ItemStatus
     location: String
   }

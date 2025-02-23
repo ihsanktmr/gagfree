@@ -1,11 +1,12 @@
-import { AuthenticationError, UserInputError } from "apollo-server";
+import { AuthenticationError, UserInputError } from "apollo-server-express";
+import { FileUpload } from "graphql-upload";
 import mongoose from "mongoose";
 
 import { Item } from "../models/Item";
+import { ImageService } from "../services/imageService";
 import {
   Context,
   CreateItemInput,
-  ItemDocument,
   ItemFilters,
   UpdateItemInput,
 } from "../types";
@@ -65,12 +66,25 @@ export const itemResolvers = {
     ) => {
       if (!user) throw new AuthenticationError("Not authenticated");
 
-      const item = await Item.create({
-        ...input,
-        owner: new mongoose.Types.ObjectId(user.id),
-      });
+      try {
+        // Upload images and get URLs
+        const imageUrls = await ImageService.uploadMultipleImages(
+          input.images as unknown as FileUpload[],
+        );
 
-      return await Item.findById(item._id).populate("owner").exec();
+        const item = await Item.create({
+          ...input,
+          images: imageUrls,
+          owner: new mongoose.Types.ObjectId(user.id),
+        });
+
+        return await Item.findById(item._id).populate("owner").exec();
+      } catch (error) {
+        if (error instanceof Error) {
+          throw new UserInputError(error.message);
+        }
+        throw new Error("Error processing images");
+      }
     },
 
     updateItem: async (
@@ -86,16 +100,39 @@ export const itemResolvers = {
         throw new AuthenticationError("Not authorized");
       }
 
-      const updatedItem = await Item.findByIdAndUpdate(
-        new mongoose.Types.ObjectId(id),
-        { ...input },
-        { new: true },
-      )
-        .populate("owner")
-        .exec();
+      try {
+        let imageUrls = item.images;
+        if (input.images) {
+          // Delete old images
+          await Promise.all(
+            item.images.map((url) => ImageService.deleteImage(url)),
+          );
 
-      if (!updatedItem) throw new UserInputError("Item not found");
-      return updatedItem;
+          // Upload new images
+          imageUrls = await ImageService.uploadMultipleImages(
+            input.images as unknown as FileUpload[],
+          );
+        }
+
+        const updatedItem = await Item.findByIdAndUpdate(
+          new mongoose.Types.ObjectId(id),
+          {
+            ...input,
+            images: imageUrls,
+          },
+          { new: true },
+        )
+          .populate("owner")
+          .exec();
+
+        if (!updatedItem) throw new UserInputError("Item not found");
+        return updatedItem;
+      } catch (error) {
+        if (error instanceof Error) {
+          throw new UserInputError(error.message);
+        }
+        throw new Error("Error processing images");
+      }
     },
 
     deleteItem: async (_: any, { id }: { id: string }, { user }: Context) => {
@@ -106,6 +143,11 @@ export const itemResolvers = {
       if (item.owner.toString() !== user.id) {
         throw new AuthenticationError("Not authorized");
       }
+
+      // Delete associated images
+      await Promise.all(
+        item.images.map((url) => ImageService.deleteImage(url)),
+      );
 
       await Item.findByIdAndDelete(new mongoose.Types.ObjectId(id));
       return true;
