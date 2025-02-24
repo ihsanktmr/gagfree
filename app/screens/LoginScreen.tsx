@@ -1,33 +1,83 @@
 import React, { useState } from "react";
 
+import { useMutation, useQuery } from "@apollo/client";
 import { useNavigation } from "@react-navigation/native";
 import { ThemedView } from "app/components/containers/ThemedView";
 import { AuthScreenNavigationProp } from "app/navigation/types";
-import { loginRequest } from "app/redux/auth/actions";
-import { selectAuthError, selectAuthLoading } from "app/redux/auth/selectors";
+import { loginSuccess } from "app/redux/auth/actions";
+import { GET_USERS, LOGIN } from "app/services/authServices";
 import { StyleSheet } from "react-native";
 import { Button, Text, TextInput } from "react-native-paper";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 
 export const LoginScreen = () => {
   const dispatch = useDispatch();
   const navigation = useNavigation<AuthScreenNavigationProp>();
-  const loading = useSelector(selectAuthLoading);
-  const error = useSelector(selectAuthError);
+
+  const { data: usersData } = useQuery(GET_USERS);
+
+  const [login, { loading, error }] = useMutation(LOGIN, {
+    onCompleted: (data) => {
+      console.log("Login successful:", data);
+      dispatch(loginSuccess(data.login));
+      navigation.replace("Main");
+    },
+    onError: (error) => {
+      console.error(
+        "GraphQL Error:",
+        error.message,
+        error.graphQLErrors,
+        error.networkError,
+      );
+    },
+  });
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleLogin = () => {
-    dispatch(loginRequest({ email, password }));
+  const handleDevFill = () => {
+    setEmail("test@test.com");
+    setPassword("password123");
+    console.log("Dev fill - using credentials:", {
+      email: "test@test.com",
+      password: "password123",
+    });
+  };
+
+  const handleLogin = async () => {
+    try {
+      const trimmedEmail = email.trim().toLowerCase();
+
+      console.log("Existing users:", usersData?.users);
+      console.log("Attempting login with:", { email: trimmedEmail });
+
+      const response = await login({
+        variables: {
+          email: trimmedEmail,
+          password,
+        },
+      });
+      console.log("Login response:", response);
+    } catch (err: any) {
+      console.error("Login error full details:", {
+        message: err.message,
+        graphQLErrors: err.graphQLErrors,
+        networkError: err.networkError,
+      });
+    }
   };
 
   return (
     <ThemedView style={styles.container}>
       <Text style={styles.title}>Welcome Back!</Text>
 
-      {error && <Text style={styles.error}>{error}</Text>}
+      {error && (
+        <Text style={styles.error}>
+          {error.graphQLErrors?.[0]?.message ||
+            "Login failed. Please check your credentials."}
+        </Text>
+      )}
 
       <TextInput
         label="Email"
@@ -63,6 +113,17 @@ export const LoginScreen = () => {
       >
         Login
       </Button>
+
+      {__DEV__ && (
+        <Button
+          mode="outlined"
+          onPress={handleDevFill}
+          style={styles.devButton}
+          icon="developer-mode"
+        >
+          Dev: Auto Fill Form
+        </Button>
+      )}
 
       <Button
         mode="text"
@@ -103,6 +164,10 @@ const styles = StyleSheet.create({
   },
   textButton: {
     marginTop: 8,
+  },
+  devButton: {
+    marginTop: 8,
+    backgroundColor: "#FFE0E0", // Light red to indicate dev feature
   },
   error: {
     color: "red",
