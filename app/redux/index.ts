@@ -10,12 +10,14 @@ import {
   persistStore,
 } from "redux-persist";
 
+import authReducer from "./auth/reducers";
+import chatReducer from "./chat/reducers";
 import languageReducer from "./language/reducers";
 import miscReducer from "./misc/reducers";
 import { persistStorage } from "./persistStorage";
-import themeReducer from "./theme/reducers";
 import postsReducer from "./post/reducers";
-import chatReducer from "./chat/reducers";
+import themeReducer from "./theme/reducers";
+
 // Combine reducers
 const rootReducer = {
   misc: miscReducer,
@@ -23,6 +25,7 @@ const rootReducer = {
   post: postsReducer,
   theme: themeReducer,
   language: languageReducer,
+  auth: authReducer,
 };
 
 const persistConfig = {
