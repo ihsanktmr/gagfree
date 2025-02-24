@@ -9,6 +9,7 @@ import { MOCK_POSTS } from "app/data/mockPosts";
 import { usePostForm } from "app/hooks/usePostForm";
 import { usePostsData } from "app/hooks/usePostsData";
 import { useThemeColor } from "app/hooks/useThemeColor";
+import { MainTabScreenProps } from "app/navigation/types";
 import { initializePosts, setPosts } from "app/redux/post/actions";
 import { selectTheme } from "app/redux/theme/selectors";
 import { Alert, StyleSheet, View } from "react-native";
@@ -17,11 +18,19 @@ import { useDispatch, useSelector } from "react-redux";
 
 import { CREATE_ITEM, DELETE_ITEM, GET_ITEMS } from "../services/postServices";
 
-interface PostsScreenProps {
-  initialRegion: Region;
-}
+type PostsScreenProps = MainTabScreenProps<"Posts">;
 
-export const PostsScreen: React.FC<PostsScreenProps> = ({ initialRegion }) => {
+// Default region (you can adjust these coordinates as needed)
+const DEFAULT_REGION: Region = {
+  latitude: 37.78825,
+  longitude: -122.4324,
+  latitudeDelta: 0.0922,
+  longitudeDelta: 0.0421,
+};
+
+export const PostsScreen: React.FC<PostsScreenProps> = ({ route }) => {
+  const initialRegion: Region = route.params?.initialRegion || DEFAULT_REGION;
+
   // Query for fetching items
   const { data, loading, error, refetch } = useQuery(GET_ITEMS, {
     variables: {

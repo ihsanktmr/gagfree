@@ -4,7 +4,7 @@ import { distances } from "app/aesthetic/distances";
 import { typography } from "app/aesthetic/typography";
 import { useThemeColor } from "app/hooks/useThemeColor";
 import { StyleSheet, View } from "react-native";
-import { IconButton } from "react-native-paper";
+import { Button, IconButton } from "react-native-paper";
 
 import { ThemedText } from "../texts/ThemedText";
 
@@ -13,6 +13,8 @@ interface EmptyStateProps {
   title: string;
   description: string;
   iconSize?: number;
+  buttonText?: string;
+  onButtonPress?: () => void;
 }
 
 export const EmptyState: React.FC<EmptyStateProps> = ({
@@ -20,6 +22,8 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   title,
   description,
   iconSize = 48,
+  buttonText,
+  onButtonPress,
 }) => {
   const textColor = useThemeColor("text");
   const mainColor = useThemeColor("main");
@@ -36,6 +40,11 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
       <ThemedText style={[styles.description, { color: textColor + "99" }]}>
         {description}
       </ThemedText>
+      {buttonText && onButtonPress && (
+        <Button mode="contained" onPress={onButtonPress} style={styles.button}>
+          {buttonText}
+        </Button>
+      )}
     </View>
   );
 };
@@ -61,5 +70,8 @@ const styles = StyleSheet.create({
     fontFamily: typography.secondary.regular,
     textAlign: "center",
     lineHeight: 22,
+  },
+  button: {
+    marginTop: 8,
   },
 });

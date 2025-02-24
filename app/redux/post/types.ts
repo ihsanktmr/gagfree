@@ -19,15 +19,21 @@ export interface Contact {
 
 // Represents a single post for giving away items
 export interface Post {
-  _id: string; // Unique identifier for the post
-  title: string; // Title of the post
-  description: string; // Description of the post
-  userId: string; // Add this field
-  images?: Array<{ imageUrl: string }>;
-  contact: Contact; // Use the Contact interface
-  category?: string;
-  createdAt?: string;
-  postType: PostType; // Type of the post
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  images: string[];
+  location: string;
+  createdAt: string;
+  updatedAt: string;
+  views: number;
+  likes: number;
+  user: {
+    id: string;
+    username: string;
+    avatar?: string;
+  };
 }
 
 // Represents the state of posts in the application
