@@ -1,5 +1,6 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
+import { useMutation, useQuery, useSubscription } from "@apollo/client";
 import Entypo from "@expo/vector-icons/build/Entypo";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -17,6 +18,13 @@ import { Message, MessageSender } from "app/redux/chat/types";
 import { Alert, KeyboardAvoidingView, Share, StyleSheet } from "react-native";
 import { Menu } from "react-native-paper";
 import { useDispatch } from "react-redux";
+
+import {
+  GET_CONVERSATION,
+  MARK_AS_READ,
+  MESSAGE_SUBSCRIPTION,
+  SEND_MESSAGE,
+} from "../services/chatServices";
 
 const mockMessages: Message[] = [
   {
@@ -46,11 +54,44 @@ export function ChatDetailScreen() {
   const navigation = useNavigation<ChatDetailScreenNavigationProp>();
   const route = useRoute<ChatDetailScreenRouteProp>();
   const dispatch = useDispatch();
-  const { chatId, title: chatTitle, otherUserId } = route.params;
+  const { chatId, title: chatTitle, otherUserId, postId } = route.params;
 
   const iconColor = useThemeColor("icon");
   const backgroundColor = useThemeColor("background");
   const messageListRef = useRef<MessageListRef>(null);
+
+  const { data, loading, error } = useQuery(GET_CONVERSATION, {
+    variables: { id: chatId },
+  });
+
+  const [sendMessage] = useMutation(SEND_MESSAGE);
+  const [markAsRead] = useMutation(MARK_AS_READ);
+
+  useSubscription(MESSAGE_SUBSCRIPTION, {
+    variables: { conversationId: chatId },
+    onData: ({ data }) => {
+      if (data?.messageReceived) {
+        // Add new message to the list
+        setMessages((prev) => [
+          ...prev,
+          transformMessage(data.messageReceived),
+        ]);
+        messageListRef.current?.scrollToEnd();
+      }
+    },
+  });
+
+  useEffect(() => {
+    if (data?.conversation) {
+      // Mark conversation as read when opened
+      markAsRead({ variables: { id: chatId } });
+
+      // Transform messages to our format
+      const transformedMessages =
+        data.conversation.messages.map(transformMessage);
+      setMessages(transformedMessages);
+    }
+  }, [data]);
 
   const handleGoBack = () => navigation.goBack();
 
@@ -187,16 +228,20 @@ export function ChatDetailScreen() {
     </Menu>
   );
 
-  const handleSendMessage = (text: string) => {
-    const newMessage: Message = {
-      id: (messages.length + 1).toString(),
-      text,
-      timestamp: new Date().toISOString(),
-      sender: "user" as MessageSender,
-    };
-    setMessages((prevMessages) => [...prevMessages, newMessage]);
-
-    messageListRef.current?.scrollToEnd();
+  const handleSendMessage = async (text: string) => {
+    try {
+      await sendMessage({
+        variables: {
+          input: {
+            content: text,
+            receiverId: otherUserId,
+            itemId: postId,
+          },
+        },
+      });
+    } catch (error) {
+      Alert.alert("Error", "Failed to send message");
+    }
   };
 
   return (
@@ -231,6 +276,13 @@ const styles = StyleSheet.create({
   chatContent: {
     flexGrow: 1,
   },
+});
+
+const transformMessage = (message: any): Message => ({
+  id: message.id,
+  text: message.content,
+  timestamp: message.createdAt,
+  sender: message.sender.id === userId ? "user" : "other",
 });
 
 export default ChatDetailScreen;

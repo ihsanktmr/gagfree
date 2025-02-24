@@ -62,10 +62,22 @@ export const typeDefs = gql`
     content: String!
     sender: User!
     receiver: User!
+    conversation: Conversation!
     item: Item
     status: MessageStatus!
-    createdAt: DateTime!
-    updatedAt: DateTime!
+    createdAt: String!
+    updatedAt: String!
+  }
+
+  type Conversation {
+    id: ID!
+    participants: [User!]!
+    lastMessage: Message
+    messages: [Message!]!
+    unreadCount: Int!
+    archivedBy: [ID!]!
+    createdAt: String!
+    updatedAt: String!
   }
 
   # Input types
@@ -129,6 +141,7 @@ export const typeDefs = gql`
 
     messages(userId: ID!): [Message!]!
     conversation(withUserId: ID!): [Message!]!
+    conversations: [Conversation!]!
   }
 
   # Mutations
@@ -149,8 +162,10 @@ export const typeDefs = gql`
     showInterest(itemId: ID!): Item!
 
     # Message mutations
-    sendMessage(input: MessageInput!): Message!
+    sendMessage(input: SendMessageInput!): Message!
     markMessageAsRead(id: ID!): Message!
+    archiveConversation(id: ID!): Conversation!
+    unarchiveConversation(id: ID!): Conversation!
   }
 
   # Message Input
@@ -163,5 +178,12 @@ export const typeDefs = gql`
   # Subscriptions
   type Subscription {
     messageReceived: Message!
+  }
+
+  # New input types
+  input SendMessageInput {
+    content: String!
+    receiverId: String!
+    itemId: String
   }
 `;
