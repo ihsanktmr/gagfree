@@ -56,6 +56,9 @@ export const MainTabBar: React.FC<MainTabBarProps> = ({
           } else if (route.name === "Chats") {
             icon = <Entypo name="chat" size={24} color={iconColor} />;
             label = i18n.t("chats");
+          } else if (route.name === "Profile") {
+            icon = <MaterialIcons name="person" size={24} color={iconColor} />;
+            label = i18n.t("profile");
           }
 
           const { options } = descriptors[route.key];

@@ -45,6 +45,19 @@ export const LoginScreen = () => {
     });
   };
 
+  const handleLoginDirectly = () => {
+    dispatch(
+      loginSuccess({
+        id: "test-user-id",
+        email: "test@test.com",
+        token: "dev-test-token",
+      }),
+    );
+    navigation.replace("Main", {
+      screen: "Profile",
+    });
+  };
+
   const handleLogin = async () => {
     try {
       const trimmedEmail = email.trim().toLowerCase();
@@ -122,6 +135,17 @@ export const LoginScreen = () => {
           icon="developer-mode"
         >
           Dev: Auto Fill Form
+        </Button>
+      )}
+
+      {__DEV__ && (
+        <Button
+          mode="outlined"
+          onPress={handleLoginDirectly}
+          style={styles.devButton}
+          icon="developer-mode"
+        >
+          Dev: Login Directly
         </Button>
       )}
 

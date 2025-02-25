@@ -6,6 +6,7 @@ const en = {
   changeLanguage: "Change Language",
   settings: "Settings",
   chats: "Chats",
+  profile: "Profile",
   notifications: "Notifications",
   discover: "Discover",
   onboardingDescription1:

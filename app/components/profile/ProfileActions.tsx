@@ -4,7 +4,7 @@ import { useNavigation } from "@react-navigation/native";
 import { ProfileScreenNavigationProp } from "app/navigation/types";
 import { logout } from "app/redux/auth/actions";
 import { StyleSheet, View } from "react-native";
-import { Button, List } from "react-native-paper";
+import { Button, Divider, List } from "react-native-paper";
 import { useDispatch } from "react-redux";
 
 export const ProfileActions = () => {
@@ -21,18 +21,18 @@ export const ProfileActions = () => {
       <List.Section>
         <List.Item
           title="Edit Profile"
+          description="Change your profile details"
           left={(props) => <List.Icon {...props} icon="account-edit" />}
           onPress={() => navigation.navigate("EditProfile")}
+          style={styles.listItem}
         />
+        <Divider />
         <List.Item
           title="My Posts"
+          description="View and manage your posts"
           left={(props) => <List.Icon {...props} icon="post" />}
           onPress={() => navigation.navigate("MyPosts")}
-        />
-        <List.Item
-          title="Settings"
-          left={(props) => <List.Icon {...props} icon="cog" />}
-          onPress={() => navigation.navigate("Settings")}
+          style={styles.listItem}
         />
       </List.Section>
 
@@ -40,7 +40,7 @@ export const ProfileActions = () => {
         mode="outlined"
         onPress={handleLogout}
         style={styles.logoutButton}
-        color="red"
+        textColor="purple"
       >
         Logout
       </Button>
@@ -51,10 +51,15 @@ export const ProfileActions = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginTop: 20,
+    padding: 20,
+  },
+  listItem: {
+    paddingVertical: 8,
   },
   logoutButton: {
-    marginTop: 20,
-    marginHorizontal: 16,
+    marginTop: 24,
+    alignSelf: "center",
+    width: "90%",
+    borderRadius: 8,
   },
 });
